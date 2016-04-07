@@ -11,7 +11,8 @@ require 'octocore/trends'
 require 'octocore/kldivergence'
 require 'octocore/scheduler'
 require 'octocore/schedeuleable'
-
+require 'octocore/helpers'
+require 'octocore/kafka_bridge'
 
 module Octo
 
