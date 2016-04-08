@@ -1,8 +1,11 @@
 require 'securerandom'
+require 'octocore/stats'
 
 module Octo
   module Helpers
     module ApiHelper
+
+      include Octo::Stats
 
       KONG_HEADERS = %w(HTTP_X_CONSUMER_ID HTTP_X_CONSUMER_CUSTOM_ID HTTP_X_CONSUMER_USERNAME)
 
@@ -19,7 +22,9 @@ module Octo
       # Gets the POSTed parameters from rack env
       # @return [Hash] A hash of POSTed parameters
       def post_params
-        JSON.parse(request.env['rack.input'].read)
+        instrument(:json_parse) do
+         JSON.parse(request.env['rack.input'].read)
+        end
       end
 
       # Generate a UUID for each response
@@ -46,7 +51,8 @@ module Octo
       # Gets the kafka bridge
       def get_kafka_bridge
         unless @kafka_bridge
-          @kafka_bridge = Octo::KafkaBridge.new
+          kafka_config = Octo.get_config :kafka
+          @kafka_bridge = Octo::KafkaBridge.new(opts=kafka_config)
         end
         @kafka_bridge
       end

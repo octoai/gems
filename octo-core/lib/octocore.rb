@@ -1,6 +1,7 @@
 require 'cequel'
 require 'yaml'
 
+
 require 'octocore/models'
 require 'octocore/version'
 require 'octocore/counter'
@@ -13,8 +14,11 @@ require 'octocore/scheduler'
 require 'octocore/schedeuleable'
 require 'octocore/helpers'
 require 'octocore/kafka_bridge'
+require 'octocore/config'
+require 'octocore/stats'
 
 module Octo
+  extend Octo::Config
 
   # Connect using the provided configuration. If you want to extend Octo's connect
   #   method you can override this method with your own. Just make sure to make
@@ -33,6 +37,9 @@ module Octo
 
 
   def self._connect(configuration)
+
+    load_config configuration
+
     # Establish Cequel Connection
     connection = Cequel.connect(configuration)
     Cequel::Record.connection = connection
@@ -41,8 +48,15 @@ module Octo
     default_cache = {
         host: '127.0.0.1', port: 6379
     }
-    cache_config = configuration.fetch(:redis, default_cache)
+    cache_config = Octo.get_config(:redis, default_cache)
     Cequel::Record.update_cache_config(*cache_config.values_at(:host, :port))
+
+    # Establish connection to statsd server if required
+    if configuration.has_key?(:statsd)
+      statsd_config = configuration[:statsd]
+      set_config :stats, Statsd.new(*statsd_config.values)
+    end
+
   end
 
 end

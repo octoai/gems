@@ -7,9 +7,10 @@ module Octo
     TOPIC     = ENV['KAFKA_TOPIC']
 
     # Changes as per environment
-    BROKERS   = ENV['KAFKA_BROKERS'].split(',')
+    BROKERS   = ENV['KAFKA_BROKERS'].try(:split, ',')
 
     def initialize(opts = {})
+      opts.deep_symbolize_keys!
       @kafka = Kafka.new(seed_brokers: opts.fetch(:brokers, BROKERS),
                          client_id: opts.fetch(:client_id, CLIENT_ID)
       )
@@ -20,6 +21,11 @@ module Octo
           # Trigger a delivery every 3 seconds.
           delivery_interval: 3,
       )
+      if opts.has_key?(:topic)
+        @topic = opts[:topic]
+      else
+        @topic = TOPIC
+      end
     end
 
     def push(params)
@@ -35,7 +41,7 @@ module Octo
     # Creates a new message.
     # @param [Hash] message The message hash to be produced
     def create_message(message)
-      @producer.produce(JSON.dump(message), topic: TOPIC)
+      @producer.produce(JSON.dump(message), topic: @topic)
     end
 
   end
