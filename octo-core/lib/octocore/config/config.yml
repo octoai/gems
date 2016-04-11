@@ -18,3 +18,5 @@ kafka:
     - 127.0.0.1:9092
   client_id: octomatic_development
   topic: events
+kong:
+  url: 'http://127.0.0.1:8001'
