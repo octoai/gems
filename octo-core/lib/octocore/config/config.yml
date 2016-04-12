@@ -18,5 +18,14 @@ kafka:
     - 127.0.0.1:9092
   client_id: octomatic_development
   topic: events
+logile: '/tmp/octo.log'
+allowed_events:
+  - app.init
+  - app.login
+  - app.logout
+  - page.view
+  - productpage.view
+  - update.push_token
 kong:
   url: 'http://127.0.0.1:8001'
+

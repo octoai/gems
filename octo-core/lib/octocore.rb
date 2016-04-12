@@ -1,9 +1,10 @@
 require 'cequel'
 require 'yaml'
+require 'logger'
 
-
-require 'octocore/models'
 require 'octocore/version'
+require 'octocore/config'
+require 'octocore/models'
 require 'octocore/counter'
 require 'octocore/utils'
 require 'octocore/trendable'
@@ -14,11 +15,9 @@ require 'octocore/scheduler'
 require 'octocore/schedeuleable'
 require 'octocore/helpers'
 require 'octocore/kafka_bridge'
-require 'octocore/config'
 require 'octocore/stats'
 
 module Octo
-  extend Octo::Config
 
   # Connect using the provided configuration. If you want to extend Octo's connect
   #   method you can override this method with your own. Just make sure to make
@@ -40,6 +39,8 @@ module Octo
 
     load_config configuration
 
+    self.logger.info('Octo booting up.')
+
     # Establish Cequel Connection
     connection = Cequel.connect(configuration)
     Cequel::Record.connection = connection
@@ -55,8 +56,22 @@ module Octo
     if configuration.has_key?(:statsd)
       statsd_config = configuration[:statsd]
       set_config :stats, Statsd.new(*statsd_config.values)
-    end
+      end
 
+    self.logger.info('I\'m connected now.')
+    require 'octocore/callbacks'
+
+    self.logger.info('Setting callbacks.')
+
+  end
+
+  def self.logger
+    unless @logger
+      @logger = Logger.new(Octo.get_config(:logfile, $stdout)).tap do |log|
+        log.progname = name
+      end
+    end
+    @logger
   end
 
 end

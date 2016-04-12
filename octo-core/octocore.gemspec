@@ -31,5 +31,6 @@ DESC
   s.add_runtime_dependency 'resque-scheduler', '~> 4.1.0', '>= 4.1.0'
   s.add_runtime_dependency 'descriptive_statistics', '~> 2.5.1', '>= 2.5.0'
   s.add_runtime_dependency 'statsd-ruby', '~> 1.3.0', '>= 1.3.0'
+  s.add_runtime_dependency 'hooks', '~> 0.4.1', '>= 0.4.1'
   s.add_runtime_dependency 'json', '~> 1.8.1', '>= 1.8.1'
 end
