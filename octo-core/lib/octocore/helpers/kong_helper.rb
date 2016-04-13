@@ -93,11 +93,10 @@ module Octo
         end
       end
 
-      # Create a new Client
+      # List of Client
       # @params [Hash] Consumer list filter values - id, custom_id, username, size, offset
       # @return [Hash] All the clients data
       def consumerlist(payload = {})
-        
         url = '/consumers/'
         res = process_kong_request(url, :GET, payload)
         res['data']
@@ -108,6 +107,24 @@ module Octo
       # @return [String] Status
       def delete_consumer(username)
         url = '/consumers/' + username
+        payload = {}
+        process_kong_request(url, :DELETE, payload)
+      end
+
+      # List of APIS
+      # @params [Hash] APIS filter values
+      # @return [Hash] All the apis data
+      def apislist(payload = {})
+        url = '/apis/'
+        res = process_kong_request(url, :GET, payload)
+        res['data']
+      end
+
+      # Delete apis from Kong
+      # @params [String] name The name of the api
+      # @return [String] Status
+      def delete_api(name)
+        url = '/apis/' + name
         payload = {}
         process_kong_request(url, :DELETE, payload)
       end

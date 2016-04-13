@@ -1,10 +1,14 @@
 require 'cequel'
 require 'yaml'
 require 'redis'
+require 'octocore/helpers/kong_helper'
+require 'octocore/config'
 
 task :environment do
   config_file = 'lib/octocore/config/config.yml'
   config = YAML.load_file(config_file).deep_symbolize_keys
+
+  Octo.load_config config
 
   connection = Cequel.connect(config)
   Cequel::Record.connection = connection
@@ -28,6 +32,7 @@ namespace :octo do
   desc 'Drop keyspace if exists, then create and migrate'
   task :reset => :environment do
     clear_cache
+    kong_delete
     if Cequel::Record.connection.schema.exists?
       task('cequel:keyspace:drop').invoke
     end
@@ -35,12 +40,25 @@ namespace :octo do
     migrate
   end
 
-
   desc "Synchronize all models defined in `lib/octocore/models' with Cassandra " \
        "database schema"
   task :migrate => :environment do
     migrate
   end
+end
+
+# Delete Kong Consumers and Apis
+def kong_delete
+  include Octo::Helpers::KongHelper
+
+  apislist.each do |api|
+    delete_api(api['name'])
+  end
+
+  consumerlist.each do |consumer|
+    delete_consumer(consumer['username'])
+  end
+  puts 'Kong Reset'
 end
 
 # Clear Cache
