@@ -30,7 +30,7 @@ module Octo
     end
 
     # WebService class for Newsfeed
-    class WebService < Sinatra::Base
+    class WebService < ::Sinatra::Base
       extend Octo::Sinatra::Helper
       extend Octo::NewsFeed::WebServiceHelper
 
