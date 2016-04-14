@@ -3,4 +3,4 @@ require 'octocore/helpers/api_logger'
 require 'octocore/helpers/api_consumer_helper'
 require 'octocore/helpers/client_helper'
 require 'octocore/helpers/kong_helper'
-
+require 'octocore/helpers/sinatra_helper'

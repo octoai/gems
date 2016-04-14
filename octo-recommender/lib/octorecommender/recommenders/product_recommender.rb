@@ -29,4 +29,5 @@ module Octo
       input_matrix :categories, weight: 1.0
     end
   end
+
 end

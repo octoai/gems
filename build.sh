@@ -5,11 +5,12 @@
 #
 #
 
-specs=`find . -type d \( ! -name . \) -maxdepth 1 -not -name ".*" | sort -n`
+specs=( "octo-core" "octo-recommender" "octo-newsfeed" )
 
-for spec in $specs; do
+for spec in ${specs[@]}; do
   echo "Building gem $spec"
   cd $spec
+  rm *.gem
   gemspec=`find . -name '*.gemspec'`
   gem build $gemspec
 

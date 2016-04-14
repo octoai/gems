@@ -44,17 +44,8 @@ module Octo
             uuid: uuid
         }
         postparams.merge!(opts)
-        get_kafka_bridge.push(postparams)
+        settings.kafka_bridge.push(postparams)
         { eventId: opts[:uuid]}.to_json
-      end
-
-      # Gets the kafka bridge
-      def get_kafka_bridge
-        unless @kafka_bridge
-          kafka_config = Octo.get_config :kafka
-          @kafka_bridge = Octo::KafkaBridge.new(opts=kafka_config)
-        end
-        @kafka_bridge
       end
 
     end

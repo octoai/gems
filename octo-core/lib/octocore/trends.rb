@@ -7,6 +7,8 @@ module Octo
 
     include Octo::Counter::Helper
 
+    DEFAULT_COUNT = 10
+
     # Define the columns needed for Trends
     def trendable
       key :type, :int
@@ -86,11 +88,11 @@ module Octo
     # @param [Fixnum] type The type of trend to fetch
     # @param [Hash] opts The options to be provided for finding trends
     def get_trending(enterprise_id, type, opts={})
-      res = where(opts.merge({
+      res = where({
         enterprise_id: enterprise_id,
         ts: opts.fetch(:ts, Time.now.floor),
         type: type
-      }))
+      }).limit(opts.fetch(:limit, DEFAULT_COUNT))
       res.map do |r|
         clazz = @trend_class.constantize
         clazz.public_send(:recreate_from, r)

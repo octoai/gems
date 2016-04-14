@@ -3,6 +3,7 @@ require 'octocore'
 
 require 'octorecommender/recommenders'
 require 'octorecommender/version'
+require 'octorecommender/helpers'
 require 'octorecommender/octohooks'
 
 module Octo

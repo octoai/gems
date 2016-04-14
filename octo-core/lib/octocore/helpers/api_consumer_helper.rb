@@ -47,7 +47,7 @@ module Octo
               Octo::AppInit.new(enterprise: enterprise,
                                 created_at: Time.now,
                                 userid: user.id,
-                                customid: msg[:uuid]).save!
+                                customid: msg[:id]).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
@@ -55,7 +55,7 @@ module Octo
               Octo::AppLogin.new(enterprise: enterprise,
                                  created_at: Time.now,
                                  userid: user.id,
-                                 customid: msg[:uuid]).save!
+                                 customid: msg[:id]).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
@@ -63,17 +63,30 @@ module Octo
               event = Octo::AppLogout.new(enterprise: enterprise,
                                           created_at: Time.now,
                                           userid: user.id,
-                                          customid: msg[:uuid]).save!
+                                          customid: msg[:id]).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'page.view'
-              checkPage(enterprise, msg)
+              page, categories, tags = checkPage(enterprise, msg)
+              Octo::PageView.new(enterprise: enterprise,
+                                 created_at: Time.now,
+                                 userid: user.id,
+                                 routeUrl: page.routeUrl,
+                                 customid: msg[:id]
+              ).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'productpage.view'
               product, categories, tags = checkProduct(enterprise, msg)
+              Octo::ProductPageView.new(
+                                       enterprise: enterprise,
+                                       created_at: Time.now,
+                                       userid: user.id,
+                                       product_id: product.id,
+                                       customid: msg[:id]
+              ).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               hook_opts.merge!({

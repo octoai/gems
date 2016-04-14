@@ -14,9 +14,11 @@ require 'octocore/models/enterprise/category_hit'
 require 'octocore/models/enterprise/category_trend'
 require 'octocore/models/enterprise/gcm'
 require 'octocore/models/enterprise/page'
+require 'octocore/models/enterprise/page_view'
 require 'octocore/models/enterprise/product'
 require 'octocore/models/enterprise/product_baseline'
 require 'octocore/models/enterprise/product_hit'
+require 'octocore/models/enterprise/product_page_view'
 require 'octocore/models/enterprise/product_trend'
 require 'octocore/models/enterprise/push_key'
 require 'octocore/models/enterprise/tag'
@@ -58,7 +60,7 @@ module Cequel
       def recreate_from(obj)
         keys = self.key_column_names
         args = {}
-        if obj.respond_to?:enterprise_id and obj.respond_to?:uid
+        if obj.respond_to?(:enterprise_id) and obj.respond_to?(:uid)
           args[keys.delete(:enterprise_id)] = obj.enterprise_id
           if keys.length == 1
             args[keys.first] = obj.uid

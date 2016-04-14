@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name        = 'octocore'
   s.version     = Octo::VERSION
 
-  s.summary     = "Octo Enterprise Core Modules"
+  s.summary     = 'Octo Enterprise Core Modules'
   s.description = <<DESC
 Octocore is the core framework of Octomatic Enterprise. It
 contains all the core models, tasks, actions etc.
@@ -15,7 +15,7 @@ DESC
   s.files       = Dir['lib/**/*.rb', 'spec/**/*.rb', '[A-Z]*']
 
   s.homepage    =
-    'https://bitbucket.org/auroraborealisinc/gems'
+    'http://phab.octo.ai/diffusion/GEMS/'
   s.license       = 'MIT'
 
   s.has_rdoc    = true

@@ -14,7 +14,7 @@ DESC
   s.files       = Dir['lib/**/*.rb', 'spec/**/*.rb', '[A-Z]*']
 
   s.homepage    =
-      'https://bitbucket.org/auroraborealisinc/gems'
+      'http://phab.octo.ai/diffusion/GEMS/'
   s.license       = 'MIT'
 
   s.has_rdoc    = true

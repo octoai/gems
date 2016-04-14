@@ -91,6 +91,16 @@ module Octo
       end
     end
 
+    # Get similar products for products
+    # @param [Octo::Product] product The product for which similarities
+    #   have to be found
+    # @return [Array<Octo::Product>] An array containing similar
+    #   products
+    def similar_products(product, opts={})
+      eid = product.enterprise.id
+      @product_recommenders[eid].similarities_for(product.id, opts)
+    end
+
     # Get recommended time for a user
     # @param [Octo::User] user The user for whom time to be fetched
     # @return [Array<Time>] The array of time recommended
