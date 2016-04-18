@@ -28,4 +28,8 @@ allowed_events:
   - update.push_token
 kong:
   url: 'http://127.0.0.1:8001'
-
+ioscertificate:
+  path: 'path'
+  filename: 'ioscertificate.pem'
+apns:
+  host: 'gateway.sandbox.push.apple.com'
