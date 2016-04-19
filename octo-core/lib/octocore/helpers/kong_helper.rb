@@ -19,7 +19,7 @@ module Octo
         end
       end
 
-      # Process Every Kong Request 
+      # Process Every Kong Request
       # @param [String] url The url of the kong request
       # @param [Key] method The request method
       # @param [Hash] payload The request body
@@ -34,7 +34,7 @@ module Octo
           }
           uri = URI.parse(url)
           http = Net::HTTP.new(uri.host,uri.port)
-          
+
           case method
           when :GET
             header = {'Accept' => 'application/json, text/plain, */*'}
@@ -85,7 +85,7 @@ module Octo
           consumer_id: consumer_id,
           config: config
         }
-      
+
         response = process_kong_request(url, :POST, payload)
 
         if response['id']
@@ -94,7 +94,7 @@ module Octo
       end
 
       # List of Client
-      # @params [Hash] Consumer list filter values - id, custom_id, username, size, offset
+      # @param [Hash] payload The payload to send
       # @return [Hash] All the clients data
       def consumerlist(payload = {})
         url = '/consumers/'
@@ -103,7 +103,7 @@ module Octo
       end
 
       # Delete Consumers from Kong
-      # @params [String] username The username of the Client
+      # @param [String] username The username of the Client
       # @return [String] Status
       def delete_consumer(username)
         url = '/consumers/' + username
@@ -112,7 +112,7 @@ module Octo
       end
 
       # List of APIS
-      # @params [Hash] APIS filter values
+      # @param [Hash] payload filter values
       # @return [Hash] All the apis data
       def apislist(payload = {})
         url = '/apis/'
@@ -121,7 +121,7 @@ module Octo
       end
 
       # Delete apis from Kong
-      # @params [String] name The name of the api
+      # @param [String] name The name of the api
       # @return [String] Status
       def delete_api(name)
         url = '/apis/' + name

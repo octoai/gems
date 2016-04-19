@@ -120,7 +120,7 @@ module Octo
     # Does the counting from DB. Unlike the other counter that uses Redis. Hence
     #   the name local_count
     # @param [Time] duration A time/time range object
-    # @type [Fixnum] type The type of counter to look for
+    # @param [Fixnum] type The type of counter to look for
     def local_count(duration, type)
       aggr = {}
       Octo::Enterprise.each do |enterprise|

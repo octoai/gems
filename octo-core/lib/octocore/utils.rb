@@ -12,7 +12,7 @@ module Octo
       end
 
       # Deserialize a data.
-      # @param [String[ data A string containing Marshal dump of the object
+      # @param [String] data A string containing Marshal dump of the object
       def deserialize(data)
         print "Debugging Data Start"
         print data

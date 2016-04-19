@@ -15,7 +15,7 @@ module Octo
       # Get the API events. These are the ones that the client is billed for
       #   This should eventually be placed under kong helpers when that is
       #   ready
-      # @param [Set<Symbol>] Set of api_events
+      # @return [Set<Symbol>] Set of api_events
       def api_events
         Set.new(%w(app.init app.login app.logout page.view productpage.view))
       end

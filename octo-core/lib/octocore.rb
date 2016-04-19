@@ -17,6 +17,7 @@ require 'octocore/helpers'
 require 'octocore/kafka_bridge'
 require 'octocore/stats'
 
+# The main Octo module
 module Octo
 
   # Connect using the provided configuration. If you want to extend Octo's connect
@@ -35,6 +36,8 @@ module Octo
   end
 
 
+  # A low level method to connect using a configuration
+  # @param [Hash] configuration The configuration hash
   def self._connect(configuration)
 
     load_config configuration
@@ -65,6 +68,7 @@ module Octo
 
   end
 
+  # Creates a logger for Octo
   def self.logger
     unless @logger
       @logger = Logger.new(Octo.get_config(:logfile, $stdout)).tap do |log|

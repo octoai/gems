@@ -2,6 +2,10 @@
 
 Contains all the ruby gems specific to Octomatic.
 
+# Commit Guide
+
+Whenever you add a new gem, make sure to update `build.sh` also. Else, it won'tbe build.
+
 # Building
 
 ## Build all gems

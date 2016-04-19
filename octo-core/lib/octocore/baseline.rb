@@ -2,6 +2,9 @@ require 'octocore/counter/helpers'
 require 'descriptive_statistics'
 
 module Octo
+
+  # The baseline module. This module has methods that support
+  #   a baseline structure.
   module Baseline
 
     include Octo::Counter::Helper
@@ -53,6 +56,10 @@ module Octo
       end
     end
 
+    # Does an aggregation of type for a timestamp
+    # @param [Fixnum] type The counter type for which aggregation
+    #   has to be done
+    # @param [Time] ts The time at which aggregation should happen
     def aggregate(type, ts)
       Octo::Enterprise.each do |enterprise|
         aggregate_baseline enterprise.id, type, ts
@@ -82,6 +89,11 @@ module Octo
 
     private
 
+    # Stores the baseline for an enterprise, and type
+    # @param [String] enterprise_id The enterprise ID of enterprise
+    # @param [Fixnum] type The Counter type as baseline type
+    # @param [Time] ts The time stamp of storage
+    # @param [Hash{String => Float}] baseline A hash representing baseline
     def store_baseline(enterprise_id, type, ts, baseline)
       return if baseline.nil? or baseline.empty?
       baseline.each do |uid, val|

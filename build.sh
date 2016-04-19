@@ -5,7 +5,7 @@
 #
 #
 
-specs=( "octo-core" "octo-recommender" "octo-newsfeed" )
+specs=( "octo-core" "octo-recommender" "octo-newsfeed" "octo-notification")
 
 for spec in ${specs[@]}; do
   echo "Building gem $spec"
