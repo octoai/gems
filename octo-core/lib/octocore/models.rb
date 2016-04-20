@@ -79,22 +79,33 @@ module Cequel
         res = get_cached(args)
         if res
           dirty = false
-          options.keys.each do |k|
+
+          # handle price separately because of float issues
+          if options.has_key?:price
+            _v = options.delete(:price)
+            dirty = _v.round(2) != res.price.round(2)
+          end
+
+          # remaining opts
+          options.each do |k, v|
             if res.respond_to?(k)
-              unless res.public_send(k.to_sym) == options[k]
+              unless res.public_send(k) == v
                 dirty = true
+                res.public_send("#{ k }=", v)
               end
             end
           end
+
           if dirty
-            args.merge!(options)
-            res = self.new(args).save!
-            Cequel::Record.redis.setex(cache_key, get_ttl, Octo::Utils.serialize(res))
+            res.save!
+            Cequel::Record.redis.setex(cache_key, get_ttl,
+                                       Octo::Utils.serialize(res))
           end
         else
-          args.merge!(options)
-          res = self.new(args).save!
-          Cequel::Record.redis.setex(cache_key, get_ttl, Octo::Utils.serialize(res))
+          _args = args.merge(options)
+          res = self.new(_args).save!
+          Cequel::Record.redis.setex(cache_key, get_ttl,
+                                     Octo::Utils.serialize(res))
         end
         res
       end
@@ -127,8 +138,7 @@ module Cequel
         cache_key = gen_cache_key(args)
         begin
           cached_val = Cequel::Record.redis.get(cache_key)
-        rescue Exception => e
-          puts e
+        rescue Exception
           cached_val = nil
         end
 
@@ -145,7 +155,12 @@ module Cequel
             Cequel::Record.redis.setex(cache_key, get_ttl, cached_val)
           end
         end
-        Octo::Utils.deserialize(cached_val)
+        begin
+          Octo::Utils.deserialize(cached_val)
+        rescue Exception => e
+          Octo.logger.error e
+          nil
+        end
       end
 
       private

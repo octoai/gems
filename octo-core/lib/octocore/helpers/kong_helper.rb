@@ -37,7 +37,6 @@ module Octo
 
           case method
           when :GET
-            header = {'Accept' => 'application/json, text/plain, */*'}
             req = Net::HTTP::Get.new(uri, header) # GET Method
           when :POST
             req = Net::HTTP::Post.new(uri.path, header) # POST Method
@@ -128,7 +127,30 @@ module Octo
         payload = {}
         process_kong_request(url, :DELETE, payload)
       end
+    end
 
+    # This class acts as the bridge between Octo and Kong
+    class KongBridge
+      extend KongHelper
+
+      class << self
+
+        # Method to delete all consumers and apis
+        def delete_all
+          unless apislist.nil?
+            apislist.each do |api|
+              delete_api(api['name'])
+            end
+          end
+
+          unless consumerlist.nil?
+            consumerlist.each do |consumer|
+              delete_consumer(consumer['username'])
+            end
+          end
+
+        end
+      end
     end
   end
 end

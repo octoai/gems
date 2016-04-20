@@ -1,3 +1,5 @@
+require 'set'
+
 module Octo
 
   module Utils
@@ -8,16 +10,13 @@ module Octo
       #   stream
       # @param [Object] record Any object to be serialized
       def serialize(record)
-        Marshal.dump(record)
+        Marshal::dump(record)
       end
 
       # Deserialize a data.
       # @param [String] data A string containing Marshal dump of the object
       def deserialize(data)
-        print "Debugging Data Start"
-        print data
-        print "Debugging Data End"
-        Marshal.load(data)
+        Marshal::load(data)
       end
     end
   end

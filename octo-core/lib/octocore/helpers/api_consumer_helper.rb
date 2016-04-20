@@ -236,7 +236,7 @@ module Octo
         opts = {
             categories: Set.new(msg[:categories]),
             tags: Set.new(msg[:tags]),
-            price: msg[:price].to_f,
+            price: msg[:price].to_f.round(2),
             name: msg[:productName],
             routeurl: msg[:routeUrl],
             customid: msg[:uuid]

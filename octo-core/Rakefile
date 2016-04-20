@@ -49,16 +49,7 @@ end
 
 # Delete Kong Consumers and Apis
 def kong_delete
-  include Octo::Helpers::KongHelper
-
-  apislist.each do |api|
-    delete_api(api['name'])
-  end
-
-  consumerlist.each do |consumer|
-    delete_consumer(consumer['username'])
-  end
-  puts 'Kong Reset'
+  Octo::Helpers::KongBridge.delete_all
 end
 
 # Clear Cache

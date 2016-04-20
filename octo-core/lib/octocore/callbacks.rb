@@ -35,7 +35,6 @@ module Octo
 
       # Define the after_productpage_view hook
       after_productpage_view do |args|
-        Octo.logger.info 'productpage_view callback'
         update_counters args
       end
     end

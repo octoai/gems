@@ -23,7 +23,7 @@ DESC
 
   s.required_ruby_version = '>= 2.0'
 
-  s.add_runtime_dependency 'cequel',  '~> 1.7', '>= 1.7.0'
+  s.add_runtime_dependency 'cequel',  '~> 1.9', '>= 1.9.0'
   s.add_runtime_dependency 'redis', '~> 3.2.2', '>= 3.2.0'
   s.add_runtime_dependency 'hiredis', '~> 0.6.1', '>= 0.6.0'
   s.add_runtime_dependency 'rake', '~> 11.1.0', '>= 11.1.0'
