@@ -28,8 +28,12 @@ allowed_events:
   - update.push_token
 kong:
   url: 'http://127.0.0.1:8001'
-ioscertificate:
-  path: 'path'
-  filename: 'ioscertificate.pem'
 apns:
   host: 'gateway.sandbox.push.apple.com'
+aws:
+  region: 'ap-southeast-1'
+  secret_key: 'S6wzZDwQDoWAF7U+mbuFHR5uUhzp8ybxiJJjB8Yg'
+  access_key: 'AKIAJSPC6N3YAZRKVJTA'
+  bucket_name: 'octo-enterprise'
+ioscertificate:
+  filename: 'ioscertificate.pem'

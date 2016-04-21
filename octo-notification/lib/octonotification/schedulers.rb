@@ -1,7 +1,12 @@
+require 'cequel'
+require 'redis'
 require 'resque'
 require 'gcm'
 require 'apns'
 require 'json'
+require 'aws-sdk'
+require 'tempfile'
+
 require 'octorecommender'
 require 'octonotification/textgenerator'
 
@@ -50,11 +55,11 @@ module Octo
             APNS.pem  = getPEMLocationForClient(eid)
             apnsresponse = APNS.send_notification(pushtoken, :alert => notification, :other => score )
           elsif [0, 1].include?(pushtype)
-              gcmClientKey = msg[:pushKey][:key]
-              gcm = GCM.new(gcmClientKey)
-              registration_ids = [pushtoken]
-              options = {data: score, notification: notification, content_available: true, priority: 'high'}
-              gcmresponse = gcm.send(registration_ids, options)
+            gcmClientKey = msg[:pushKey][:key]
+            gcm = GCM.new(gcmClientKey)
+            registration_ids = [pushtoken]
+            options = {data: score, notification: notification, content_available: true, priority: 'high'}
+            gcmresponse = gcm.send(registration_ids, options)
           end
         end
       end
@@ -65,14 +70,36 @@ module Octo
     # @param [String] eid Enterprise Id of the client
     # @return [String] Path of the IOS certificate file
     def self.getPEMLocationForClient(eid)
+
+      if Cequel::Record.redis.get(eid).nil?
+        updatePEMLocation(eid)
+      end
+
+      if !File.exist?(Cequel::Record.redis.get(eid))
+        updatePEMLocation(eid)
+      end
+
+      Cequel::Record.redis.get(eid)
+    end
+
+    def updatePEMLocation(eid)
+      aws_config = Octo.get_config :aws
       certificate_config = Octo.get_config :ioscertificate
 
-      cHash = {
-        eid: eid,
-        path: certificate_config[:path],
-        filename: certificate_config[:filename]
-      }
-      '%{path}/%{eid}/%{filename}' % cHash
+      Aws.config.update({
+        region: aws_config[:region],
+        credentials: Aws::Credentials.new( aws_config[:access_key], aws_config[:secret_key])
+      })
+
+      s3 = Aws::S3::Client.new
+      object_key = eid + '/' + certificate_config[:filename]
+      resp = s3.get_object(bucket: aws_config[:bucket_name], key: object_key)
+      
+      pem_file = Tempfile.new 'pem_file'
+      pem_file.write resp.body.read
+      pem_file.close
+
+      Cequel::Record.redis.set( eid, pem_file.path)
     end
 
     # Fetch Trending Products

@@ -25,5 +25,5 @@ DESC
   s.add_runtime_dependency 'octorecommender', '~> 0.0.1', '>= 0.0.1'
   s.add_runtime_dependency 'gcm', '~> 0.1.1', '>= 0.1.0'
   s.add_runtime_dependency 'apns', '~> 1.0.0', '>= 1.0.0'
-
+  s.add_runtime_dependency 'aws-sdk', '~> 2.2.35', '>= 2.2.35'
 end
