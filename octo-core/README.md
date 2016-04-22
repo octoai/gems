@@ -24,8 +24,7 @@ rake octo:reset              # Drop keyspace if exists, then create and migrate
 You can use the following set of commands in `irb` to verify all things working with this gem. Execute it from irb in PROJ_DIR.
 
 ```ruby
-%w(octocore yaml).each { |x| require x }
+%w(octocore octorecommender octonewsfeed).each { |x| require x }
 config_file = 'lib/octocore/config/config.yml'
-config = YAML.load_file(config_file).deep_symbolize_keys
-Octo.connect(config)
+Octo.connect_with_config_file(config_file)
 ```

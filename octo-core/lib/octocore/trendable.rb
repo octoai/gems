@@ -36,7 +36,7 @@ module Octo
       aggr.each do |_ts, counterVals|
         counterVals.each do |obj, count|
           counter = self.new
-          counter.enterprise = obj.enterprise
+          counter.enterprise_id = obj.enterprise.id
           counter.uid = obj.unique_id
           counter.count = count
           counter.type = Octo::Counter::TYPE_MINUTE

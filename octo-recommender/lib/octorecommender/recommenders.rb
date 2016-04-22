@@ -6,6 +6,10 @@ require 'octorecommender/recommenders/time_recommender'
 module Octo
   class Recommender
 
+    # Queue for resque worker processing
+    @queue = :recommender
+
+    # Time format to convert a Time into HHMM format
     TIME_HHMM = '%H%M'
 
     # Initializes the Recommender.
@@ -128,6 +132,11 @@ module Octo
     #   from past. We need sometime from future.
     def convert_to_future(ts)
       ts + (Time.now.beginning_of_day - ts.beginning_of_day) + 7.day
+    end
+
+    # Callback method for resque worker
+    def self.perform
+      self.new.process!
     end
 
   end
