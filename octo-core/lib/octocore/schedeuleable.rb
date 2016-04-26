@@ -7,7 +7,7 @@ module Octo
       type = args[0].to_sym
 
       if Octo::Counter.constants.include?type
-        if type == :TYPE_MINUTE
+        if type == :TYPE_MINUTE and self.respond_to?(:aggregate!)
           aggregate!
         else
           method_name = type_counters_method_names type

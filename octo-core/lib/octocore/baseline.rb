@@ -39,7 +39,7 @@ module Octo
     # @param [Time] ts The timestamp at which baseline is to be found
     def get_baseline_value(baseline_type, obj, ts = Time.now.ceil)
       unless Octo::Counter.constants.include?baseline_type
-        raise ArgumentError, "No such baseline defined"
+        raise ArgumentError, 'No such baseline defined'
       end
 
       args = {
@@ -70,20 +70,18 @@ module Octo
     # Aggregates the baseline for a minute
     def aggregate_baseline(enterprise_id, type, ts = Time.now.floor)
       clazz = @baseline_for.constantize
-      last_24_hrs_minutes = 24.hour.ago.ceil.to(ts, 1.minute)
-      last_24_hrs_minutes.each do |_ts|
-        start_calc_time = (_ts.to_datetime - MAX_DURATION.day).to_time
-        last_n_days_interval = start_calc_time.ceil.to(_ts, 24.hour)
-        last_n_days_interval.each do |hist|
-          args = {
-              ts: hist,
-              type: type,
-              enterprise_id: enterprise_id
-          }
-          counters = @baseline_for.constantize.send(:where, args)
-          baseline = baseline_from_counters(counters)
-          store_baseline enterprise_id, type, hist, baseline
-        end
+      _ts = ts
+      start_calc_time = (_ts.to_datetime - MAX_DURATION.day).to_time
+      last_n_days_interval = start_calc_time.ceil.to(_ts, 24.hour)
+      last_n_days_interval.each do |hist|
+        args = {
+            ts: hist,
+            type: type,
+            enterprise_id: enterprise_id
+        }
+        counters = @baseline_for.constantize.send(:where, args)
+        baseline = baseline_from_counters(counters)
+        store_baseline enterprise_id, type, hist, baseline
       end
     end
 

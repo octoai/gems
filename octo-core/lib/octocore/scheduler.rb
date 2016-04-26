@@ -10,7 +10,7 @@ module Octo
   module Scheduler
 
     # Setup the schedules for counters.
-    def setup_schedule_counters
+    def schedule_counters
       counter_classes = [
         Octo::ProductHit,
         Octo::CategoryHit,
@@ -30,6 +30,29 @@ module Octo
           Resque.set_schedule name, config
         end
       end
+
+      # Schedules the processing of baselines
+      def schedule_baseline
+        baseline_classes = [
+            Octo::ProductBaseline,
+            Octo::CategoryBaseline,
+            Octo::TagBaseline
+        ]
+        baseline_classes.each do |clazz|
+          clazz.send(:get_typecounters).each do |counter|
+            name = [clazz, counter].join('::')
+            config = {
+                class: clazz.to_s,
+                args: [counter],
+                cron: '* * * * *',
+                persists: true,
+                queue: 'baseline_processing'
+            }
+            Resque.set_schedule name, config
+          end
+        end
+      end
+
     end
   end
 end
