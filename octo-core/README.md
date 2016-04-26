@@ -11,12 +11,20 @@ rake cequel:keyspace:drop    # Drop Cassandra keyspace
 rake octo:init               # Create keyspace and tables for all defined models
 rake octo:migrate            # Synchronize all models defined in `lib/octocore/models' with Cassandra database schema
 rake octo:reset              # Drop keyspace if exists, then create and migrate
+rake spec                    # Run RSpec code examples
 ```
 
 # Building
 
 ```bash
 ./bin/clean_setup.sh
+```
+
+# Specs
+
+```
+lang=bash
+rake spec
 ```
 
 # Verifying connectivity

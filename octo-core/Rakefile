@@ -1,8 +1,12 @@
 require 'cequel'
 require 'yaml'
 require 'redis'
+require 'rspec/core/rake_task'
+
 require 'octocore/helpers/kong_helper'
 require 'octocore/config'
+
+RSpec::Core::RakeTask.new('spec')
 
 task :environment do
   config_file = 'lib/octocore/config/config.yml'
