@@ -97,6 +97,3 @@ DEPENDENCIES
   octocore!
   parallel_tests (~> 2.5.0, >= 2.5.0)
   rspec (~> 3.4.0, >= 3.4.0)
-
-BUNDLED WITH
-   1.11.2

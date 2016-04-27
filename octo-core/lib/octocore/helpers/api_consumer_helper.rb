@@ -41,9 +41,8 @@ module Octo
             hook_opts[:event] = register_api_event(enterprise, eventName)
           end
 
-          Octo::ApiTrack.new(enterprise: enterprise,
+          Octo::ApiTrack.new(customid: msg[:id],
                             created_at: Time.now,
-                            customid: msg[:id],
                             json_dump: msg,
                             type: eventName).save!
 
