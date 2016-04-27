@@ -10,7 +10,5 @@ module Octo
     key :created_at,  :timestamp
 
     column :product_id, :bigint
-
-    column :customid, :uuid, :index => true
   end
 end

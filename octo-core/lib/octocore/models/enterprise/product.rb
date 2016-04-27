@@ -13,7 +13,6 @@ module Octo
     column :price, :float
     column :name, :text
     column :routeurl, :text
-    column :customid, :uuid, :index => true
 
     set :categories, :text
     set :tags, :text

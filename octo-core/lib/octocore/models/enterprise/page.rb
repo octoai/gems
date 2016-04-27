@@ -8,8 +8,6 @@ module Octo
 
     key :routeUrl, :text
 
-    column :customid, :uuid, :index => true
-
     set :categories, :text
     set :tags, :text
   end

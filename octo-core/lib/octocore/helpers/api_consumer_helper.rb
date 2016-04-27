@@ -41,29 +41,31 @@ module Octo
             hook_opts[:event] = register_api_event(enterprise, eventName)
           end
 
+          Octo::ApiTrack.new(enterprise: enterprise,
+                            created_at: Time.now,
+                            customid: msg[:id],
+                            json_dump: msg,
+                            type: eventName).save!
 
           case eventName
             when 'app.init'
               Octo::AppInit.new(enterprise: enterprise,
                                 created_at: Time.now,
-                                userid: user.id,
-                                customid: msg[:id]).save!
+                                userid: user.id).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'app.login'
               Octo::AppLogin.new(enterprise: enterprise,
                                  created_at: Time.now,
-                                 userid: user.id,
-                                 customid: msg[:id]).save!
+                                 userid: user.id).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'app.logout'
               event = Octo::AppLogout.new(enterprise: enterprise,
                                           created_at: Time.now,
-                                          userid: user.id,
-                                          customid: msg[:id]).save!
+                                          userid: user.id).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
               call_hooks(eventName, hook_opts)
@@ -72,8 +74,7 @@ module Octo
               Octo::PageView.new(enterprise: enterprise,
                                  created_at: Time.now,
                                  userid: user.id,
-                                 routeUrl: page.routeUrl,
-                                 customid: msg[:id]
+                                 routeUrl: page.routeUrl
               ).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
@@ -84,8 +85,7 @@ module Octo
                                        enterprise: enterprise,
                                        created_at: Time.now,
                                        userid: user.id,
-                                       product_id: product.id,
-                                       customid: msg[:id]
+                                       product_id: product.id
               ).save!
               updateLocationHistory(user, msg)
               updateUserPhoneDetails(user, msg)
@@ -212,8 +212,7 @@ module Octo
         }
         opts = {
             categories: Set.new(msg[:categories]),
-            tags: Set.new(msg[:tags]),
-            customid: msg[:uuid]
+            tags: Set.new(msg[:tags])
         }
         page = Octo::Page.findOrCreateOrUpdate(args, opts)
         [page, cats, tags]
@@ -238,8 +237,7 @@ module Octo
             tags: Set.new(msg[:tags]),
             price: msg[:price].to_f.round(2),
             name: msg[:productName],
-            routeurl: msg[:routeUrl],
-            customid: msg[:uuid]
+            routeurl: msg[:routeUrl]
         }
         prod = Octo::Product.findOrCreateOrUpdate(args, opts)
         [prod, categories, tags]

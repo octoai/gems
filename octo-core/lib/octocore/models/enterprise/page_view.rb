@@ -10,7 +10,5 @@ module Octo
     key :created_at, :timestamp
 
     column :routeurl, :text
-
-    column :customid, :uuid, :index => true
   end
 end
