@@ -1,0 +1,211 @@
+#!/usr/bin/env ruby
+#
+# A simple utility to generate fake stream of data
+#
+# Usage:
+#   ./fakestream
+
+require 'net/http'
+require 'json'
+
+require 'octocore'
+
+module Octo
+  class FakeStream
+
+    BASE_URL = 'http://127.0.0.1:8000'
+
+    MAX_USERS = 100
+
+    MAX_PRODUCTS = 200
+
+    MAX_CATEGORIES = 10
+
+    MAX_TAGS = 15
+
+    # Initialize with the URL
+    def initialize
+      @_apikeys = {}
+    end
+
+    def stream
+      user = fakeuser
+
+      # simulate an app login
+      app_init user
+
+      # simulate a product page view
+      ppv user, fakeproduct(user.enterprise)
+    end
+
+    def stream_forever
+      while 1
+        stream
+      end
+    end
+
+    private
+
+    # Create an APP INIT request
+    def app_init(user)
+      payload = {
+          userId: user.id,
+          phoneDetails: phonedetails
+      }
+      key = apikey(user.enterprise)
+      url = '/events/app.init/'
+      post(url, key, payload)
+    end
+
+    # Create a product page view request
+    def ppv(user, product)
+      payload = {
+          userId: user.id,
+          phoneDetails: phonedetails,
+          routeUrl: product.routeurl,
+          categories: fakecategories,
+          tags: faketags,
+          productId: product.id,
+          productName: product.name,
+          price: product.price
+      }
+      key = apikey user.enterprise
+      url = '/events/productpage.view/'
+      post(url, key, payload)
+    end
+
+    # Hash containing phone details
+    # @return [Hash]
+    def phonedetails
+      {
+          deviceId: 'FCDBD8EF-62FC-4ECB-B2F5-92C9E79AC7F9',
+          manufacturer: 'Apple',
+          model: 'iPhone 6',
+          latitude: 28.6139,
+          longitude: 77.209
+      }
+    end
+
+    # Creates a fake user for the enterprise on the fly
+    # @param [Octo::Enterprise] enterprise
+    # @return [Octo::User]
+    def fakeuser(enterprise = enterprises.to_a.sample)
+      Octo::User.new(enterprise_id: enterprise.id,
+                     id: rand(MAX_USERS))
+    end
+
+    # Generates a fake product for the enterprise
+    # @param [Octo::Enterprise] enterprise
+    # @return [Octo::Product]
+    def fakeproduct(enterprise)
+      id = rand(MAX_PRODUCTS)
+      Octo::Product.new(
+                       enterprise_id: enterprise.id,
+                       id: id,
+                       price: rand(10000).to_f,
+                       name: "Fake Product #{ id }",
+                       routeurl: "/Some/Url/#{ id }",
+                       categories: fakecategories,
+                       tags: faketags
+      )
+    end
+
+    # Generates fake categories
+    # @return [Array<String>] Array of fake categories
+    def fakecategories(count = 2)
+      (0..MAX_CATEGORIES).to_a.sample(count).collect { |x| "Fake Category #{ x }"}
+    end
+
+    # Generates fake tags
+    # @return [Array<String>] Array of fake tags
+    def faketags(count = 2)
+      (0..MAX_TAGS).to_a.sample(count).collect { |x| "Fake Tag #{ x }"}
+    end
+
+    # Fetches the APIKey for the enterprise
+    def apikey(enterprise)
+      unless @_apikeys.has_key?(enterprise.id)
+        @_apikeys[enterprise.id] = Octo::Authorization.find_by_username(enterprise.name).apikey
+      end
+      @_apikeys[enterprise.id]
+    end
+
+    # Creates the URI
+    def uri(url = BASE_URL)
+      URI(url)
+    end
+
+    # Find all enterprises
+    # @return [Cequel::RecordSet]
+    def enterprises
+      Octo::Enterprise.all
+    end
+
+    # Make the POST call
+    # @param [String] url The endpoint url
+    # @param [String] apikey The API Key
+    # @param [Hash] payload The payload
+    def post(url, apikey, payload)
+      headers = {
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json',
+          'apikey' => apikey
+      }
+
+      _uri = uri(BASE_URL + url)
+      req = Net::HTTP::Post.new(_uri, headers)
+      req.content_type = 'application/json'
+      req.body = payload.to_json
+
+      res = Net::HTTP.start(_uri.hostname, _uri.port) do |http|
+        http.request(req)
+      end
+
+      case res
+        when Net::HTTPSuccess, Net::HTTPRedirection
+          puts res.body
+        else
+          puts res.value
+      end
+
+    end
+
+  end
+end
+
+# All the main Job
+def _main(config_file)
+
+  # setup signal trap
+  Signal.trap('INT') {
+    puts 'Halting on user request'
+    exit
+  }
+
+  # connect Octo and start the show
+  Octo.connect_with_config_file config_file
+  streamer = Octo::FakeStream.new
+  streamer.stream_forever
+end
+
+def main
+  config_file = if ARGV[0]
+                  ARGV[0]
+                else
+                  spec = Gem::Specification.find_by_name('octocore')
+                  gem_root = spec.gem_dir
+                  File.join(gem_root, 'lib', 'octocore' ,'config', 'config.yml')
+                end
+  puts config_file
+  if File.exist?config_file
+    _main(config_file)
+  else
+    puts "Config file '#{ config_file }' does not exist. Exiting..."
+  end
+end
+
+main
+
+if __FILE__ == $0
+  main
+end

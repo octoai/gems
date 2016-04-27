@@ -10,9 +10,10 @@ Octocore is the core framework of Octomatic Enterprise. It
 contains all the core models, tasks, actions etc.
 DESC
 
-  s.authors     = ["Pranav Prakash"]
+  s.authors     = ['Pranav Prakash']
   s.email       = 'pp@octo.ai'
-  s.files       = Dir['lib/**/*.rb', 'spec/**/*.rb', '[A-Z]*']
+  s.files       = Dir['lib/**/*.rb', 'spec/**/*.rb', '[A-Z]*', 'lib/**/*.yml']
+  s.executables << 'fakestream'
 
   s.homepage    =
     'http://phab.octo.ai/diffusion/GEMS/'

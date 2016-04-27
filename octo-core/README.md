@@ -36,3 +36,17 @@ You can use the following set of commands in `irb` to verify all things working 
 config_file = 'lib/octocore/config/config.yml'
 Octo.connect_with_config_file(config_file)
 ```
+
+# Creating fake stream
+
+It ships with a utility called `fakestream`. It will automatically stream random data. To use just open your console and type
+
+```
+fakestream
+```
+
+Optionally provide a config file for octo to connect as 
+
+```
+fakestream /path/to/octo_config.yml
+```
