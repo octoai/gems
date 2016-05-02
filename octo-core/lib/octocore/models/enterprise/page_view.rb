@@ -7,7 +7,7 @@ module Octo
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
     key :userid,     :bigint
-    key :created_at, :timestamp
+    key :created_at, :timestamp, order: :desc
 
     column :routeurl, :text
   end

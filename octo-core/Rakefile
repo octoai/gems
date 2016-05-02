@@ -30,13 +30,13 @@ end
 # Overriding rake actions
 namespace :octo do
 
-  desc "Create keyspace and tables for all defined models"
+  desc 'Create keyspace and tables for all defined models'
   task :init => %w(cequel:keyspace:create octo:migrate)
 
   desc 'Drop keyspace if exists, then create and migrate'
   task :reset => :environment do
-    clear_cache
     kong_delete
+    clear_cache
     if Cequel::Record.connection.schema.exists?
       task('cequel:keyspace:drop').invoke
     end
@@ -54,6 +54,7 @@ end
 # Delete Kong Consumers and Apis
 def kong_delete
   Octo::Helpers::KongBridge.delete_all
+  puts 'Kong Cleaned'
 end
 
 # Clear Cache
@@ -63,7 +64,7 @@ def clear_cache
   }
   redis = Redis.new(default_cache.merge(driver: :hiredis))
   redis.flushall
-  puts "Cache Cleaned"
+  puts 'Cache Cleaned'
 end
 
 def migrate
