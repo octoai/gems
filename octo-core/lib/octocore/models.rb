@@ -82,7 +82,7 @@ module Cequel
           dirty = false
 
           # handle price separately because of float issues
-          if options.has_key?:price
+          if options.has_key?(:price)
             _v = options.delete(:price)
             dirty = _v.round(2) != res.price.round(2)
           end
@@ -149,7 +149,7 @@ module Cequel
           if result_count == 0
             return nil
           elsif result_count == 1
-            cached_val = Octo::Utils.serialize(res.first)
+            cached_val = Octo::Utils.serialize(res)
             Cequel::Record.redis.setex(cache_key, get_ttl, cached_val)
           elsif result_count > 1
             cached_val = Octo::Utils.serialize(res)

@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+require 'octoga'
+require 'optparse'
+require 'optparse/time'
+require 'ostruct'
+require 'gnuplot'
+
+module Octo
+
+  class GACli
+
+    #
+    # Return a structure describing the options.
+    #
+    def self.parse(args)
+      options = OpenStruct.new
+      options.verbose = false
+
+      opt_parser = OptionParser.new do |opts|
+        opts.banner = "Usage: #{ File.basename($0) } [options]"
+        opts.separator ''
+        opts.separator 'Specific options:'
+
+        # Mandatory argument Input file
+        opts.on('-infile', '--input-file FILE',
+                'The (cleaned) input CSV file exported from GA') do |infile|
+          options.infile = infile
+        end
+
+        # Mandatory argument Output file
+        opts.on('-outfile', '--output-file FILE',
+                'The full filename path to export to') do |outfile|
+          options.outfile = outfile
+        end
+
+        # No argument, shows at tail.  This will print an options summary.
+        # Try it and see!
+        opts.on_tail('-h', '--help', 'Show this message') do
+          puts opts
+          exit
+        end
+      end
+      opt_parser.parse!(args)
+      options
+    end
+
+    # Perform the conversion
+    def self.perform
+      options = Octo::GACli.parse(ARGV)
+      if (options.infile and options.outfile)
+        a = Octo::Importer::CSVImporter.process(options.infile)
+        b = Octo::GA::Analysis::DayHits.clean(a)
+        c = Octo::GA::Analysis::DayHits.view_trend(b)
+        opts = {
+          clusterer: Ai4r::Clusterers::KMeans,
+          datasize: 7,
+          filter_threshold: 3
+        }
+        cluster_count = 40
+        d, data = Octo::GA::Analysis::DayHits.cluster(c, cluster_count, opts)
+        d.clusters.each_with_index do |x,i|
+          puts "Cluster: #{ i+1 }, Cardinality: #{ x.data_items.count }"
+        end
+        plot_opts = {
+          size_x: 3600,
+          size_y: 3600
+        }
+        Octo::GA::Analysis::DayHits.plot(d, options.outfile, plot_opts)
+        csvfile = options.outfile.gsub(/\.\w+/, '.csv')
+        Octo::GA::Analysis::DayHits.export(csvfile, data)
+        puts "Saved Chart to : #{ options.outfile }"
+        puts "Saved CSV to : #{ csvfile }"
+      else
+        puts 'Illegal Usage. Check Usage with --help'
+      end
+    end
+
+  end
+
+end
+
+Octo::GACli.perform
+
