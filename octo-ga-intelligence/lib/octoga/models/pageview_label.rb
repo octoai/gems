@@ -1,3 +1,4 @@
+require 'cequel'
 require 'set'
 require 'legato'
 
@@ -7,8 +8,13 @@ module Octo
     # The Pageview class. This class measures pageviews
     #   as labels
     class PageviewLabel
+      include Cequel::Record
+
       extend Legato::Model
 
+      key :label, :text
+      column :counter, :int
+      
       metrics :totalEvents
       dimensions :eventLabel, :date
 

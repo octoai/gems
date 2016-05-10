@@ -1,0 +1,23 @@
+name: octo_ga
+host: '127.0.0.1'
+port: 9042
+keyspace: octo_ga
+max_retries: 3
+retry_delay: 1
+replication:
+  class: SimpleStrategy
+  replication_factor: 1
+redis:
+  host: 127.0.0.1
+  port: 6379
+statsd:
+  host: 127.0.0.1
+  port: 8125
+kafka:
+  brokers:
+    - 127.0.0.1:9092
+  client_id: octomatic_development
+  topic: events
+logile: '/tmp/octo.log'
+apns:
+  host: 'gateway.sandbox.push.apple.com'

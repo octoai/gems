@@ -4,16 +4,23 @@ PATH
     octoga (0.0.1)
       activesupport (~> 4.2.6, >= 4.2.6)
       ai4r (~> 1.13, >= 1.13)
+      cequel (~> 1.9, >= 1.9.0)
       descriptive_statistics (~> 2.5.1, >= 2.5.1)
       gnuplot (~> 2.6.2, >= 2.6.2)
+      hiredis (~> 0.6.1, >= 0.6.0)
       legato (~> 0.7.0, >= 0.7.0)
       oauth2 (~> 1.1.0, >= 1.1.0)
+      rake (~> 11.1.0, >= 11.1.0)
+      redis (~> 3.2.2, >= 3.2.0)
       sinatra (~> 1.4.7, >= 1.4.7)
       smarter_csv (~> 1.1.0, >= 1.1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    activemodel (4.2.6)
+      activesupport (= 4.2.6)
+      builder (~> 3.1)
     activesupport (4.2.6)
       i18n (~> 0.7)
       json (~> 1.7, >= 1.7.7)
@@ -21,12 +28,20 @@ GEM
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     ai4r (1.13)
+    builder (3.2.2)
+    cassandra-driver (2.1.6)
+      ione (~> 1.2)
+    cequel (1.9.0)
+      activemodel (~> 4.0)
+      cassandra-driver (~> 2.0)
     descriptive_statistics (2.5.1)
     diff-lcs (1.2.5)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
     gnuplot (2.6.2)
+    hiredis (0.6.1)
     i18n (0.7.0)
+    ione (1.2.3)
     json (1.8.3)
     jwt (1.5.1)
     legato (0.7.0)
@@ -47,6 +62,8 @@ GEM
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
+    rake (11.1.2)
+    redis (3.2.2)
     rspec (3.4.0)
       rspec-core (~> 3.4.0)
       rspec-expectations (~> 3.4.0)
@@ -77,6 +94,3 @@ DEPENDENCIES
   octoga!
   parallel_tests (~> 2.5.0, >= 2.5.0)
   rspec (~> 3.4.0, >= 3.4.0)
-
-BUNDLED WITH
-   1.11.2
