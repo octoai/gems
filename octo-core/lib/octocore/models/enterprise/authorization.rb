@@ -8,7 +8,7 @@ module Octo
     include Octo::Helpers::KongHelper
 
     key :username, :text
-    
+
     column :enterprise_id, :text
     column :email, :text
     column :apikey, :text

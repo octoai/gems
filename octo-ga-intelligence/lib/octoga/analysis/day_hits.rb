@@ -1,6 +1,7 @@
 require 'csv'
 require 'descriptive_statistics'
 require 'ai4r'
+require 'benchmark'
 
 class Array
   def rjust!(n, x); insert(0, *Array.new([0, n-length].max, x)) end
@@ -68,6 +69,66 @@ module Octo
           end
         end
 
+        def self.som(opts={})
+          unless @som
+            # set defaults to the source
+            nodes = opts.fetch(:nodes, 8)
+            layer_nodes = opts.fetch(:layer_nodes, nodes)
+            learning_rate = opts.fetch(:learning_rate, 0.7)
+
+            phase_one = opts.fetch(:phase_one, 150)
+            phase_two = opts.fetch(:phase_two, 100)
+            phase_one_learning_rate = opts.fetch(:phase_one_learning_rate, 0.1)
+            phase_two_learning_rate = opts.fetch(:phase_two_learning_rate, 0.0)
+
+            datasize = opts.fetch(:datasize, 10)
+            @som = Ai4r::Som::Som.new(datasize, nodes,
+                                     Ai4r::Som::TwoPhaseLayer.new(layer_nodes,
+                                                                  learning_rate,
+                                                                  phase_one,
+                                                                  phase_two,
+                                                                  phase_one_learning_rate,
+                                                                  phase_two_learning_rate))
+          end
+          @som
+        end
+
+        def self.som_clustering(data, opts={})
+          datasize = opts.fetch(:datasize, 7)
+          data_set = self.data_set_for(data, datasize)
+
+          rev_clustered_data = Hash[data_set.collect {|x| Set.new(x) }.zip(data.keys)]
+
+          som = self.som opts.merge({ datasize: datasize })
+          som.initiate_map
+          times = Benchmark.measure do
+            som.train data_set
+          end
+          $stdout.puts "SOM Training time: #{ times }"
+          clustered_data = Hash.new([])
+          data_set.each do |data_item|
+            _t = Set.new(data_item)
+            page = rev_clustered_data[_t]
+            if data.has_key?page
+              bmu_node = som.find_bmu(data_item)[0]
+              if clustered_data.has_key?(bmu_node.id)
+                clustered_data[bmu_node.id] = clustered_data[bmu_node.id] << data_item
+              else
+                clustered_data[bmu_node.id] = [data_item]
+              end
+            end
+          end
+#          clustered_data.delete_if { |k,v| v.count < opts.fetch(:threshold, 5) }
+          clustered_data
+        end
+
+        def self.data_set_for(data, duration)
+          data_set = data.values.collect do |x|
+            (x.class == Array) ? x.slice(0, duration) : data.values.slice(0, duration)
+          end
+          data_set.collect { |x| x.ljust!(duration, 0) }.uniq
+        end
+
         # Does the clustering on normalized data
         def self.cluster(data, cluster_num = 30, opts={})
           clustered_data = {}
@@ -76,20 +137,12 @@ module Octo
           # equalise the dimension for clustering
           max_data_size = opts.fetch(:datasize, 7)
 
-          data_set = data.values.collect do |x|
-            (x.class == Array) ? x.slice(0,max_data_size) : data.values.slice(0,max_data_size)
-          end
-
-          max_dimension = data_set.inject(0) do |max,arr|
-            max = (max < arr.length) ? arr.length : max
-          end
-          data_set.each { |x| x.ljust!(max_dimension, 0) }
+          data_set = self.data_set_for(data, max_data_size)
 
           clustered_data = Hash[data.keys.zip(data_set)]
           rev_clustered_data = Hash[data_set.collect { |x| Set.new(x) }.zip(data.keys)]
 
-
-          lbl = Array.new(max_dimension) { |i| 'Day_' + (i+1).to_s }
+          lbl = Array.new(max_data_size) { |i| 'Day_' + (i+1).to_s }
           ds = Ai4r::Data::DataSet.new(data_items: data_set, data_labels: lbl)
 
           # Perform Clustering
@@ -132,8 +185,60 @@ module Octo
           end
         end
 
+        def self.plot2(data_cluster, file = '/tmp/cluster2.png', opts = {})
+          total_clusters = data_cluster.keys.count
+          all_data_count = data_cluster.values.inject(0) do |sum, cluster|
+            sum += cluster.count
+          end
+
+          title = "#{ opts.fetch(:title, "Clusters: #{ total_clusters }") }. Size: #{ all_data_count }"
+
+          columns = opts.fetch(:columns, 3)
+          rows = ((1.0 * total_clusters)/columns).ceil
+
+          size_x = columns * opts.fetch(:chart_size_x, 600)
+          size_y = rows * opts.fetch(:chart_size_y, 800)
+
+          xlabel = opts.fetch(:xlabel, 'Days')
+          ylabel = opts.fetch(:ylabel, 'Slope')
+
+          lmargin = opts.fetch(:lmargin, 4).to_s
+          bmargin = opts.fetch(:bmargin, 4).to_s
+
+          font = opts.fetch(:font, "'4'")
+
+          Gnuplot.open do |gp|
+            gp << "set terminal png size #{ size_x }, #{ size_y } nocrop\n
+            set output '#{ file }'\n
+            set multiplot layout #{ rows }, #{ columns} title '#{ title }'\n"
+
+            data_cluster.each do |cluster_id, cluster_items|
+              maxd = cluster_items.inject(0) { |r,e| r = (r < e.length) ? e.length : r }
+              x_labels = Array.new(maxd) { |i| i }
+              title = "'Cluster: #{ cluster_id}, Set Count: #{ cluster_items.count }'"
+              Gnuplot::Plot.new(gp) do |plot|
+                plot.set "title", title
+                plot.xlabel xlabel
+                plot.ylabel ylabel
+                plot.lmargin lmargin
+                plot.bmargin bmargin
+                plot.nokey
+                plot.xtics 'nomirror'
+                plot.font font
+
+                cluster_items.each do |cluster|
+                  plot.data << Gnuplot::DataSet.new([x_labels, cluster]) do |ds|
+                    ds.with = 'linespoints'
+                  end
+                end
+
+              end
+            end
+          end
+        end
+
         # Plot the graph
-        def self.plot(data, file = '/Users/pranav/Desktop/out.png', opts={})
+        def self.plot(data, file = '/tmp/cluster.png', opts={})
           total_clusters = data.clusters.count
           all_data_count = data.clusters.inject(0) do |sum, cluster|
             sum += cluster.data_items.count

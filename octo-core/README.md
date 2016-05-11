@@ -32,7 +32,7 @@ rake spec
 You can use the following set of commands in `irb` to verify all things working with this gem. Execute it from irb in PROJ_DIR.
 
 ```ruby
-%w(octocore octorecommender octonewsfeed).each { |x| require x }
+%w(octocore).each { |x| require x }
 config_file = 'lib/octocore/config/config.yml'
 Octo.connect_with_config_file(config_file)
 ```

@@ -52,6 +52,16 @@ module Octo
         a = Octo::Importer::CSVImporter.process(options.infile)
         b = Octo::GA::Analysis::DayHits.clean(a)
         c = Octo::GA::Analysis::DayHits.view_trend(b)
+
+        som_opts = {
+          datasize: 15,
+          nodes: 5,
+          layer_nodes: 10
+        }
+        d = Octo::GA::Analysis::DayHits.som_clustering(c, som_opts)
+        d.each { |k,v| puts "Cluster: #{ k}, Carinality: #{ v.count }" }
+        Octo::GA::Analysis::DayHits.plot2(d, options.outfile)
+=begin
         opts = {
           clusterer: Ai4r::Clusterers::KMeans,
           datasize: 7,
@@ -69,8 +79,11 @@ module Octo
         Octo::GA::Analysis::DayHits.plot(d, options.outfile, plot_opts)
         csvfile = options.outfile.gsub(/\.\w+/, '.csv')
         Octo::GA::Analysis::DayHits.export(csvfile, data)
+=end
         puts "Saved Chart to : #{ options.outfile }"
+=begin
         puts "Saved CSV to : #{ csvfile }"
+=end
       else
         puts 'Illegal Usage. Check Usage with --help'
       end
