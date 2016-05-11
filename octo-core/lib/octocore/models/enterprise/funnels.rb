@@ -11,13 +11,20 @@ module Octo
 
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
-    key :name, :text
+    key :name_slug, :text
     list :funnel, :text
+
+    column :name, :text
     column :active, :boolean
 
-    before_create :activate_funnel
+    before_create :create_name_slug, :activate_funnel
 
     after_create :populate_with_fake_data
+
+    # Creates name slug
+    def create_name_slug
+      self.name_slug = self.name.to_slug
+    end
 
     # Activates a funnel
     def activate_funnel
@@ -25,35 +32,60 @@ module Octo
     end
 
     # Generates a new funnel from the pages provided
+    # @param [Array] pages The pages array. This array could contain instances
+    #   of either String, Octo::Product or Octo::Page.
+    #   If string, it will be assumed that these are routeurls for pages or
+    #   products.
+    #   If the class is explicitly specified, it will be used.
+    # @param [Hash] opts The options for creating funnel
+    # @option opts [String] :name The name of the funnel
+    # @option opts [String] :enterprise_id The enterprise ID for whom funnel is
+    #   being created
+    # @return [Octo::Funnel] The funnel created
     def self.from_pages(pages, opts = {})
       funnel_length = pages.count
       return nil if funnel_length.zero?
 
-      # Assume pages to be string URLs for the pages/products
-      funnel = pages
+      funnel = Array.new
+      enterprise_id = opts.fetch(:enterprise_id, nil)
 
       # Check if they are Octo::Product or Octo::Page instantces and handle
       if ::Set.new([Octo::Product, Octo::Page]).include?(pages[0].class)
         funnel = pages.collect { |p| p.routeurl }
         enterprise_id = pages[0].enterprise_id
+      elsif pages[0].class == String
+        funnel = pages
       end
 
       # Create a new funnel
       self.new(
-        enterprise_id: opts.fetch(:enterprise_id, enterprise_id),
+        enterprise_id: enterprise_id,
         name: opts.fetch(:name),
         funnel: funnel
       ).save!
     end
 
     # Populates a newly created funnel with some fake data
-    def populate_with_fake_data
-      Octo::FunnelData.new(
+    # @param [Fixnum] days The number of days for which data to be faked
+    def populate_with_fake_data(interval_days = 7)
+      today = Time.now.beginning_of_day
+      (today - interval_days.days).to(today, 24.hour).each do |ts|
+        Octo::FunnelData.new(
+          enterprise_id: self.enterprise_id,
+          funnel_slug: self.name_slug,
+          ts: Time.now.floor,
+          value: fake_data(self.funnel.count)
+        ).save!
+      end
+    end
+
+    # Returns all the data for a funnel
+    # @return [Octo::FunnelData] The Octo funnel data
+    def data
+      Octo::FunnelData.find_by_enterprise_id_and_funnel_slug(
         enterprise_id: self.enterprise_id,
-        funnel_name: self.name,
-        ts: Time.now.floor,
-        value: fake_data(self.funnel.count)
-      ).save!
+        funnel_slug: self.name_slug
+      )
     end
 
     private

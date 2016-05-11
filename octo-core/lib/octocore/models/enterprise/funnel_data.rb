@@ -10,7 +10,7 @@ module Octo
 
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
-    key :funnel_name, :text
+    key :funnel_slug, :text
 
     column :ts, :timestamp
     list :value, :float

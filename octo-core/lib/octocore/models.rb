@@ -151,7 +151,7 @@ module Cequel
           if result_count == 0
             return nil
           elsif result_count == 1
-            cached_val = Octo::Utils.serialize(res)
+            cached_val = Octo::Utils.serialize(res.first)
             Cequel::Record.redis.setex(cache_key, get_ttl, cached_val)
           elsif result_count > 1
             cached_val = Octo::Utils.serialize(res)
