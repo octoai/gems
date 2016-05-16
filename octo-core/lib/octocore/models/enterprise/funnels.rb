@@ -17,6 +17,8 @@ module Octo
     column :name, :text
     column :active, :boolean
 
+    timestamps
+
     before_create :create_name_slug, :activate_funnel
 
     after_create :populate_with_fake_data
@@ -73,7 +75,7 @@ module Octo
         Octo::FunnelData.new(
           enterprise_id: self.enterprise_id,
           funnel_slug: self.name_slug,
-          ts: Time.now.floor,
+          ts: ts,
           value: fake_data(self.funnel.count)
         ).save!
       end

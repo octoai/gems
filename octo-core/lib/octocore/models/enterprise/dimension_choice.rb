@@ -3,17 +3,18 @@ require 'octocore/record'
 
 module Octo
 
-  # Stores the data for funnels
-  class FunnelData
+  # Choices for dimensions
+  class DimensionChoice
+
     include Cequel::Record
     include Octo::Record
 
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
-    key :funnel_slug, :text
+    key :dimension, :int
+    column :choice, :text
 
-    key :ts, :timestamp
-    list :value, :float
+    timestamps
 
   end
 end
