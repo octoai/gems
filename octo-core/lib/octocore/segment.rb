@@ -29,6 +29,11 @@ module Octo
           mapping_as_choice dimension_text
         end
 
+        # Returns logic operatos as a choice for operating between dimensions
+        def logic_operators_as_choice
+          mapping_as_choice logic_text
+        end
+
         # Helper method to return valid choices for a given dimension. It tries
         #   to find the values from db first. In case, there is nothing, it
         #   shows some default values, so the dashboard does not look totally
@@ -95,6 +100,15 @@ module Octo
             Octo::Segmentation::Dimensions::ENGAGEMENT => 'Engagement',
             Octo::Segmentation::Dimensions::LAST_ACTIVE => 'Last Active On',
             Octo::Segmentation::Dimensions::CREATED_ON => 'Created On'
+          }
+        end
+
+        def logic_text
+          {
+            Octo::Segmentation::Operators::AND => 'AND',
+            Octo::Segmentation::Operators::OR  => 'OR',
+            Octo::Segmentation::Operators::NOT => 'NOT',
+            Octo::Segmentation::Operators::XOR => 'XOR',
           }
         end
 
@@ -165,6 +179,10 @@ module Octo
       LTE             = 4
       LT              = 5
       IN              = 6
+      AND             = 7
+      OR              = 8
+      NOT             = 9
+      XOR             = 10
 
       class << self
 

@@ -20,6 +20,7 @@ module Octo
 
     list :dimensions, :int      # list storing dimensions used
     list :operators, :int       # list storing operators on dimensions
+    list :dim_operators, :int   # list storing operators between dimensions
     list :values, :text         # list of values for operations on dimensions
 
     timestamps                  # The usual housekeeping thing
