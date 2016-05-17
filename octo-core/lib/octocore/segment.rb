@@ -14,10 +14,12 @@ module Octo
       class << self
 
         # Helper method for returning operators as a hash to be used in UX
+        # @param [Fixnum] dimension The dimension for which the operators
+        #   are to be fetched
         # @return [Array<Hash{Symbol => String }>] The hash containing key :text
         #   as the text to display, and another key :id as the id to be used
         #   as reference while communicating
-        def operators_as_choice
+        def operators_as_choice(dimension = nil)
           mapping_as_choice operator_text
         end
 
@@ -63,18 +65,18 @@ module Octo
 
         private
 
+        # Returns a hash containing keys as Operators and the values as string
+        #   text corresponding to them.
         def operator_text
           {
             Octo::Segmentation::Operators::EQUAL => '= Equals',
             Octo::Segmentation::Operators::NOT_EQUAL => '!= Not Equals',
-            Octo::Segmentation::Operators::GTE => '>= Greater than Or Equals',
-            Octo::Segmentation::Operators::GT => '> Greater than',
-            Octo::Segmentation::Operators::LTE => '<= Less than Or Equals',
-            Octo::Segmentation::Operators::LT => '< Less than',
             Octo::Segmentation::Operators::IN => 'Within range'
           }
         end
 
+        # Return a hash containing keys as dimensions and the values as methods
+        #   which should be called to populate the values
         def dimension_choice
           {
             Octo::Segmentation::Dimensions::CITY => :city_choices,
@@ -88,6 +90,7 @@ module Octo
           }
         end
 
+        # Returns a hash containing the dimension value and the string text
         def dimension_text
           {
             Octo::Segmentation::Dimensions::CITY => 'City',
@@ -101,6 +104,14 @@ module Octo
             Octo::Segmentation::Dimensions::LAST_ACTIVE => 'Last Active On',
             Octo::Segmentation::Dimensions::CREATED_ON => 'Created On'
           }
+        end
+
+        # Defines which operators can be used for which dimensions
+        def dimension_operator
+          ops = Set.new([Octo::Segmentation::Operators::EQUAL,
+                 Octo::Segmentation::Operators::NOT_EQUAL,
+                 Octo::Segmentation::Operators::IN])
+          Hash.new { |h,k| h[k] = ops }
         end
 
         def logic_text

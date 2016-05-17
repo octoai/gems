@@ -6,6 +6,9 @@ module Octo
   # The conversions store
   class Conversions
 
+    include Cequel::Record
+    include Octo::Record
+
     # Types of conversions
     NEWSFEED            = 0
     PUSH_NOTIFICATION   = 1
