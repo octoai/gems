@@ -33,18 +33,18 @@ module Octo
         }
       end
 
-      def data(type, ts = Time.now.floor)
+      def data( enterprise_id, type, ts = Time.now.floor)
         args = {
-          enterprise_id: self.enterprise.id,
+          enterprise_id: enterprise_id,
           type: type,
           ts: ts
         }
         res = self.where(args)
         if res.count > 0
-          res
+          res.first
         else
           args.merge!({ value: rand(10.0..67.0) })
-          self.new().save!
+          self.new(args).save!
         end
       end
 
