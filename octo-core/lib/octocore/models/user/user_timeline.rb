@@ -30,12 +30,13 @@ module Octo
 
     timestamps
 
-    def self.fakedata(user, ts, n = rand(4..9))
-      Array.new(n) do |i|
+    def self.fakedata(user, n = rand(4..9))
+      Array.new(3*n) do |i|
+        i+1
+      end.shuffle.sample(n).sort.reverse.collect do |i|
         args = {
-          enterprise_id: user.enterprise.id,
-          user_id: user.id,
-          ts: ts,
+          user: user,
+          ts: i.minutes.ago,
           type: rand(0..5),
           title: 'title',
           location_type: rand(11..16),
