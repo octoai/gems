@@ -2,12 +2,16 @@ require 'cequel'
 require 'octocore/record'
 
 module Octo
-  class ApiEvent
+
+  class Plan
+
     include Cequel::Record
     include Octo::Record
 
-    belongs_to :enterprise, class_name: 'Octo::Enterprise'
+    key :id, :int
+    key :active, :boolean
 
-    key :eventname, :text
+    column :name, :text
   end
 end
+

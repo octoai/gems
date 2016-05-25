@@ -107,6 +107,23 @@ module Octo
         start_time.ceil.to(ts, step)
       end
 
+      # Returns the mapping for counters as text
+      # @return [Hash]
+      def self.counter_text
+        {
+          TYPE_MINUTE => 'Near Real Time',
+          TYPE_MINUTE_30 => '30 Minute',
+          TYPE_HOUR => 'Hourly',
+          TYPE_HOUR_3 => '3 Hourly',
+          TYPE_HOUR_6 => '6 Hourly',
+          TYPE_HOUR_12 => '12 Hourly',
+          TYPE_DAY => 'Daily',
+          TYPE_DAY_3 => '3 Days',
+          TYPE_DAY_6 => '6 Days',
+          TYPE_WEEK => 'Weekly'
+        }
+      end
+
       # Generate aggregator methods for a class. You can pass
       # your own block to generator for all custom needs.
       # Check out the implementation at Octo::Counter#countables

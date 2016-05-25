@@ -16,3 +16,4 @@ module Octo
     trend_class 'Octo::Category'
   end
 end
+

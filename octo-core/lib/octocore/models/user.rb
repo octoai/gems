@@ -12,3 +12,4 @@ module Octo
     has_many :user_location_histories
   end
 end
+
