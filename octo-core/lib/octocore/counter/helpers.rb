@@ -23,7 +23,28 @@ module Octo
       #   Counter class.
       # @return [Array] Array of all the constants that define a counter type
       def get_typecounters
-        Counter.constants.select { |x| x.to_s.start_with?('TYPE') }
+        max = max_type
+        Counter.constants.select do |x|
+          if x.to_s.start_with?('TYPE')
+            Counter.const_get(x) <= max
+          else
+            false
+          end
+        end
+      end
+
+      # Define the max granularity that should exist
+      def max_type(type = nil)
+        if @max_type
+          @max_type
+        else
+          if type
+            @max_type = type
+          else
+            @max_type = 9
+          end
+        end
+        @max_type
       end
 
       # Coverts the method name to the constant type

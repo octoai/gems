@@ -15,7 +15,8 @@ module Octo
         Octo::ProductHit,
         Octo::CategoryHit,
         Octo::TagHit,
-        Octo::ApiHit
+        Octo::ApiHit,
+        Octo::NewsfeedHit
       ]
       counter_classes.each do |clazz|
         clazz.send(:get_typecounters).each do |counter|

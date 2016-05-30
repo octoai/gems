@@ -8,6 +8,9 @@ module Octo
     include Cequel::Record
     include Octo::Record
 
+    # Type of Ctr. Reserved for future use
+    NEWSFEED = 0
+
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
     key :ts, :timestamp

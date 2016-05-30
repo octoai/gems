@@ -16,6 +16,10 @@ module Octo
     # If you have to create a counter of type TYPE_MINUTE_36, consider
     # creating subcounters like TYPE_MINUTE_9 and TYPE_MINUTE_4. Derive
     # TYPE_MINUTE_9 from TYPE_MINUTE_4 and TYPE_MINUTE_4 from TYPE_MINUTE_1
+    # NOTE:
+    #
+    # IT IS VERY VERY IMPORTANT TO KEEP THE VALUES OF THESE COUNTERS IN
+    # ASCENDING ORDER. because it helps to define a concept of "max_type"
     TYPE_MINUTE     = 0
     TYPE_MINUTE_30  = 1
     TYPE_HOUR       = 2
