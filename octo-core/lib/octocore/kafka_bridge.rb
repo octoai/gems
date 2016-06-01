@@ -18,6 +18,9 @@ module Octo
           # Trigger a delivery once 100 messages have been buffered.
           delivery_threshold: 100,
 
+          # to avoid any potential Kafka::BufferOverflow error
+          max_buffer_size: 200,
+
           # Trigger a delivery every 3 seconds.
           delivery_interval: 3,
       )

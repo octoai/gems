@@ -1,6 +1,8 @@
 require 'cequel'
 
 module Octo
+
+  # Storage for Notifications
   class GcmNotification
     include Cequel::Record
 
@@ -16,3 +18,4 @@ module Octo
 
   end
 end
+

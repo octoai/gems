@@ -21,6 +21,7 @@ require 'octocore/models/enterprise/funnels'
 require 'octocore/models/enterprise/funnel_data'
 require 'octocore/models/enterprise/gcm'
 require 'octocore/models/enterprise/newsfeed_hit'
+require 'octocore/models/enterprise/notification_hit'
 require 'octocore/models/enterprise/page'
 require 'octocore/models/enterprise/pageload_time'
 require 'octocore/models/enterprise/page_view'
@@ -68,6 +69,35 @@ module Cequel
 
     # Override Cequel::Record here
     module ClassMethods
+
+      # fakes up data
+      def fake_data_with(args, values, opts={})
+        res = []
+        ts = args.fetch(:ts, 7.days.ago..Time.now.floor)
+        if ts.class == Range
+          bod = opts.fetch(:bod, false)
+          ts_begin = ts.begin
+          ts_end = ts.end
+          if bod
+            ts_begin = ts_begin.beginning_of_day
+            ts_end = ts_end.end_of_day
+          end
+          step = opts.fetch(:step, 1.minute)
+          ts_begin.to(ts_end, step).each do |_ts|
+            _args = args.merge({ ts: _ts })
+            r = self.where(_args)
+            if r.count == 0
+              res << self.new(_args.merge(values)).save!
+            else
+              res << r
+            end
+          end
+        elsif ts.class == Time
+          _args = args.merge({ ts: ts }).merge(values)
+          res << self.new(_args).save!
+        end
+        res.flatten
+      end
 
       # Recreates this object from other object
       def recreate_from(obj)
@@ -201,3 +231,4 @@ module Cequel
     end
   end
 end
+
