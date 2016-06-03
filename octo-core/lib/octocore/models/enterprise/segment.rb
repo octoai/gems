@@ -44,7 +44,7 @@ module Octo
       }
       res = Octo::SegmentData.where(args)
       if res.count > 0
-        res
+        res.first
       else
         # populate a poser data
         val = [rand(1000..10000), rand(0.0..70.0)]
