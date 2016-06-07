@@ -156,7 +156,10 @@ module Octo
         end
 
         def engagement_choices(enterprise_id=nil)
-          ['Highly Engaged', 'Moderately Engaged', 'Low engaged', 'Not Engaged']
+          [Octo::UserPersona::HIGH_ENGAGED,
+           Octo::UserPersona::MEDIUM_ENGAGED,
+           Octo::UserPersona::LOW_ENGAGED,
+           Octo::UserPersona::DEAD].collect { |x| Octo::UserPersona.engaged_text(x) }
         end
 
 

@@ -6,6 +6,12 @@ module Octo
     CLIENT_ID = ENV['KAFKA_CLIENT_ID']
     TOPIC     = ENV['KAFKA_TOPIC']
 
+    MAX_BUFFER_SIZE = 20_000
+
+    MAX_QUEUE_SIZE = 10_000
+
+    DELIVERY_INTERVAL = 1
+
     # Changes as per environment
     BROKERS   = ENV['KAFKA_BROKERS'].try(:split, ',')
 
@@ -15,14 +21,9 @@ module Octo
                          client_id: opts.fetch(:client_id, CLIENT_ID)
       )
       @producer = @kafka.async_producer(
-          # Trigger a delivery once 100 messages have been buffered.
-          delivery_threshold: 100,
-
-          # to avoid any potential Kafka::BufferOverflow error
-          max_buffer_size: 200,
-
-          # Trigger a delivery every 3 seconds.
-          delivery_interval: 3,
+        max_buffer_size: opts.fetch(:max_buffer_size, MAX_BUFFER_SIZE),
+        max_queue_size: opts.fetch(:max_queue_size, MAX_QUEUE_SIZE),
+        delivery_interval: opts.fetch(:delivery_interval, DELIVERY_INTERVAL),
       )
       if opts.has_key?(:topic)
         @topic = opts[:topic]
@@ -44,7 +45,13 @@ module Octo
     # Creates a new message.
     # @param [Hash] message The message hash to be produced
     def create_message(message)
-      @producer.produce(JSON.dump(message), topic: @topic)
+      begin
+        @producer.produce(JSON.dump(message), topic: @topic)
+      rescue Kafka::BufferOverflow
+        Octo.logger.error 'Buffer Overflow. Sleeping for 1s'
+        sleep 1
+        retry
+      end
     end
 
   end

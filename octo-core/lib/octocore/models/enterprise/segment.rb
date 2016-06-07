@@ -14,6 +14,8 @@ module Octo
     key :name_slug, :text       # Name slug as key
     key :active, :boolean       # Active or Not
 
+    column :intelligence, :boolean # If it is Octo's intelligent segment or manual
+
     column :name, :text         # Name of the segment
     column :type, :int          # Type of segment
     column :event_type, :text   # Event Type used for events segmentation
@@ -51,6 +53,10 @@ module Octo
         args.merge!({ value: val })
         Octo::SegmentData.new(args).save!
       end
+    end
+
+    def self.find_by_enterprise_and_name(enterprise, name)
+      where({enterprise_id: enterprise.id, name_slug: name.to_slug})
     end
 
 

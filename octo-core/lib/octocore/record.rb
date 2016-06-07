@@ -1,6 +1,10 @@
 module Octo
   module Record
 
+#    def marshal_load(data)
+#      Octo.logger.info data
+#    end
+
     def unique_id
       candidates = self.key_attributes
       if candidates.length == 1

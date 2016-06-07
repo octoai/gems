@@ -20,16 +20,11 @@ module Octo
     column :engagement, :float
 
     def engaged_text
-      case self.engagement
-      when HIGH_ENGAGED
-        'Highly Engaged'
-      when MEDIUM_ENGAGED
-        'Moderately Engaged'
-      when LOW_ENGAGED
-        'Low Engagement'
-      when DEAD
-        'Slipping Out'
-      end
+      _engaged_text self.engagement
+    end
+
+    def self.engaged_text(val)
+      _engaged_text val
     end
 
     def self.fakedata(user, ts)
@@ -84,6 +79,21 @@ module Octo
           end
         end
         result
+      end
+    end
+
+    private
+
+    def _engaged_text(val)
+      case val
+      when HIGH_ENGAGED
+        'Highly Engaged'
+      when MEDIUM_ENGAGED
+        'Moderately Engaged'
+      when LOW_ENGAGED
+        'Low Engagement'
+      when DEAD
+        'Slipping Out'
       end
     end
 
