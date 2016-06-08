@@ -47,7 +47,7 @@ module Octo
       res = Octo::SegmentData.where(args)
       if res.count > 0
         res.first
-      else
+      elsif self.enterprise.fakedata?
         # populate a poser data
         val = [rand(1000..10000), rand(0.0..70.0)]
         args.merge!({ value: val })

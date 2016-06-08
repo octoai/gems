@@ -28,12 +28,12 @@ module Octo
       def types
         {
           'Newsfeed' => Octo::Conversions::NEWSFEED,
-          'Push Notification' => Octo::Conversions::PUSH_NOTIFICATION,
-          'Email' => Octo::Conversions::EMAIL
+          'Notification' => Octo::Conversions::PUSH_NOTIFICATION,
+#          'Email' => Octo::Conversions::EMAIL
         }
       end
 
-      def data( enterprise_id, type, ts = Time.now.floor)
+      def data( enterprise_id, type, ts = 3.days.ago..Time.now.floor)
         args = {
           enterprise_id: enterprise_id,
           type: type,
@@ -43,9 +43,23 @@ module Octo
         if res.count > 0
           res.first
         else
-          args.merge!({ value: rand(10.0..67.0) })
-          self.new(args).save!
+          res = []
+          e = Octo::Enterprise.find_by_id(enterprise_id)
+          if e.fakedata?
+            if ts.class == Range
+              ts_begin = ts.begin.floor
+              ts_end = ts.end.floor
+              ts_begin.to(ts_end, 1.day).each do |_ts|
+                _args = args.merge( ts: _ts, value: rand(10.0..67.0))
+                res << self.new(_args).save!
+              end
+            elsif ts.class == Time
+              args.merge!({ value: rand(10.0..67.0) })
+              res << self.new(args).save!
+            end
+          end
         end
+        res
       end
 
     end

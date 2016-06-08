@@ -23,6 +23,13 @@ module Octo
       setup_intelligent_segments
     end
 
+    # Method to check if it is okay to create fakedata for this
+    #   client
+    # @return [Boolean]
+    def fakedata?
+      self.name.start_with?('Octo')
+    end
+
     private
 
     # Setup the notification categories for the enterprise

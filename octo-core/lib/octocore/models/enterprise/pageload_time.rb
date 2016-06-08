@@ -19,7 +19,7 @@ module Octo
 
     def self.fakedata(args)
       res = self.where(args)
-      if res.count == 0
+      if res.count == 0 and self.enterprise.fakedata?
         res = []
         ts = args.fetch(ts, 7.days.ago..Time.now.floor)
         if ts.class == Range

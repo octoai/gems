@@ -70,14 +70,16 @@ module Octo
     # Populates a newly created funnel with some fake data
     # @param [Fixnum] days The number of days for which data to be faked
     def populate_with_fake_data(interval_days = 7)
-      today = Time.now.beginning_of_day
-      (today - interval_days.days).to(today, 24.hour).each do |ts|
-        Octo::FunnelData.new(
-          enterprise_id: self.enterprise_id,
-          funnel_slug: self.name_slug,
-          ts: ts,
-          value: fake_data(self.funnel.count)
-        ).save!
+      if self.enterprise.fakedata?
+        today = Time.now.beginning_of_day
+        (today - interval_days.days).to(today, 24.hour).each do |ts|
+          Octo::FunnelData.new(
+            enterprise_id: self.enterprise_id,
+            funnel_slug: self.name_slug,
+            ts: ts,
+            value: fake_data(self.funnel.count)
+          ).save!
+        end
       end
     end
 
