@@ -88,11 +88,34 @@ module Octo
     # @param [Fixnum] type The type of trend to fetch
     # @param [Hash] opts The options to be provided for finding trends
     def get_trending(enterprise_id, type, opts={})
-      res = where({
+      ts = opts.fetch(:ts, Time.now.floor)
+      args = {
         enterprise_id: enterprise_id,
         ts: opts.fetch(:ts, Time.now.floor),
         type: type
-      }).limit(opts.fetch(:limit, DEFAULT_COUNT))
+      }
+      res = where(args).limit(opts.fetch(:limit, DEFAULT_COUNT))
+      enterprise = Octo::Enterprise.find_by_id(enterprise_id)
+      if res.count == 0 and enterprise.fakedata?
+        res = []
+        if ts.class == Range
+          ts_begin = ts.begin
+          ts_end = ts.end
+          ts_begin.to(ts_end, 1.day).each do |_ts|
+            3.times do |rank|
+              uid = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10).shuffle.pop.unique_id
+              _args = args.merge( ts: _ts, rank: rank, score: rank+1, uid: uid )
+              res << self.new(_args).save!
+            end
+          end
+        elsif ts.class == Time
+          3.times do |rank|
+            uid = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10).shuffle.pop.unique_id
+            _args = args.merge( rank: rank, score: rank+1, uid: uid )
+            res << self.new(_args).save!
+          end
+        end
+      end
       res.map do |r|
         clazz = @trend_class.constantize
         clazz.public_send(:recreate_from, r)
