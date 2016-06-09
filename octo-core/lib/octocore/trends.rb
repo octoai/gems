@@ -97,6 +97,7 @@ module Octo
       res = where(args).limit(opts.fetch(:limit, DEFAULT_COUNT))
       enterprise = Octo::Enterprise.find_by_id(enterprise_id)
       if res.count == 0 and enterprise.fakedata?
+        Octo.logger.info 'Beginning to fake data'
         res = []
         if ts.class == Range
           ts_begin = ts.begin

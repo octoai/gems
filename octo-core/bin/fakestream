@@ -138,7 +138,7 @@ module Octo
     # Find all enterprises
     # @return [Cequel::RecordSet]
     def enterprises
-      Octo::Enterprise.all.select { |x| x.fakedata? }
+      Octo::Enterprise.all.select { |x| !x.name.nil? and x.fakedata? }
     end
 
     # Make the POST call
