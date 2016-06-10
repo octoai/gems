@@ -51,22 +51,19 @@ module Octo
               Octo::AppInit.new(enterprise: enterprise,
                                 created_at: Time.now,
                                 userid: user.id).save!
-              updateLocationHistory(user, msg)
-              updateUserPhoneDetails(user, msg)
+              updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'app.login'
               Octo::AppLogin.new(enterprise: enterprise,
                                  created_at: Time.now,
                                  userid: user.id).save!
-              updateLocationHistory(user, msg)
-              updateUserPhoneDetails(user, msg)
+              updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'app.logout'
               event = Octo::AppLogout.new(enterprise: enterprise,
                                           created_at: Time.now,
                                           userid: user.id).save!
-              updateLocationHistory(user, msg)
-              updateUserPhoneDetails(user, msg)
+              updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'page.view'
               page, categories, tags = checkPage(enterprise, msg)
@@ -75,8 +72,7 @@ module Octo
                                  userid: user.id,
                                  routeUrl: page.routeUrl
               ).save!
-              updateLocationHistory(user, msg)
-              updateUserPhoneDetails(user, msg)
+              updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'productpage.view'
               product, categories, tags = checkProduct(enterprise, msg)
@@ -86,8 +82,7 @@ module Octo
                                        userid: user.id,
                                        product_id: product.id
               ).save!
-              updateLocationHistory(user, msg)
-              updateUserPhoneDetails(user, msg)
+              updateUserDeviceDetails(user, msg)
               hook_opts.merge!({
                                    product: product,
                                    categories: categories,
@@ -181,18 +176,45 @@ module Octo
         ).save!
       end
 
-      # Updates user's phone details
+      # Updates user's device details
       # @param [Octo::User] user The user to whom this token belongs to
+      # @param [Hash] msg The message hash
+      def updateUserDeviceDetails(user, msg)
+        args = {user_id: user.id, user_enterprise_id: user.enterprise.id}
+
+        # Check Device Type
+        if msg[:browser]
+          updateUserBrowserDetails(args, msg)
+        elsif msg[:phone]
+          updateLocationHistory(user, msg)
+          updateUserPhoneDetails(args, msg)
+        end
+      end
+
+      # Updates user's phone details
+      # @param [Hash] args The user details to whom this token belongs to
       # @param [Hash] msg The message hash
       # @return [Octo::UserPhoneDetails] The phone details object
       #   corresponding to this user
-      def updateUserPhoneDetails(user, msg)
-        args = {user_id: user.id, user_enterprise_id: user.enterprise.id}
+      def updateUserPhoneDetails(args, msg)
         opts = {deviceid: msg[:phone].fetch('deviceId', ''),
                 manufacturer: msg[:phone].fetch('manufacturer', ''),
                 model: msg[:phone].fetch('model', ''),
                 os: msg[:phone].fetch('os', '')}
         Octo::UserPhoneDetails.findOrCreateOrUpdate(args, opts)
+      end
+
+      # Updates user's browser details
+      # @param [Hash] args The user details to whom this token belongs to
+      # @param [Hash] msg The message hash
+      # @return [Octo::UserBrowserDetails] The browser details object
+      #   corresponding to this user
+      def updateUserBrowserDetails(args, msg)
+        opts = {name: msg[:browser].fetch('name', ''),
+                platform: msg[:browser].fetch('platform', ''),
+                manufacturer: msg[:browser].fetch('manufacturer', ''),
+                cookieid: msg[:browser].fetch('cookieid', '')}
+        Octo::UserBrowserDetails.findOrCreateOrUpdate(args, opts)
       end
 
       # Checks the existence of a page and creates if not found
@@ -285,7 +307,8 @@ module Octo
             enterpriseId:   eid,
             enterpriseName: ename,
             event_name:     msg['event_name'],
-            phone:          msg.fetch('phoneDetails', {}),
+            phone:          msg.fetch('phoneDetails', nil),
+            browser:        msg.fetch('browserDetails', nil),
             userId:         msg.fetch('userId', -1),
             created_at:     Time.now
         }

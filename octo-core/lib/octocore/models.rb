@@ -41,6 +41,7 @@ require 'octocore/models/enterprise/template'
 
 require 'octocore/models/user'
 require 'octocore/models/user/push_token'
+require 'octocore/models/user/user_browser_details'
 require 'octocore/models/user/user_location_history'
 require 'octocore/models/user/user_phone_details'
 require 'octocore/models/user/user_persona'
