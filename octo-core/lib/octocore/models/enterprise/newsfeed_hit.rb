@@ -23,7 +23,9 @@ module Octo
 
     def self.fakedata(args)
       res = self.where(args)
-      if res.count == 0 and self.enterprise.fakedata?
+
+      enterprise = Octo::Enterprise.find_by_id(args[:enterprise_id])
+      if res.count == 0 and enterprise.fakedata?
         unless args.has_key?(:uid)
           args[:uid] = 'newsfeed'
         end

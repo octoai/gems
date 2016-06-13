@@ -104,16 +104,23 @@ module Octo
           ts_end = ts.end
           ts_begin.to(ts_end, 1.day).each do |_ts|
             3.times do |rank|
-              uid = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10).shuffle.pop.unique_id
-              _args = args.merge( ts: _ts, rank: rank, score: rank+1, uid: uid )
-              res << self.new(_args).save!
+              items = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10)
+              if items.count > 0
+                uid = items.shuffle.pop.unique_id
+                _args = args.merge( ts: _ts, rank: rank, score: rank+1, uid: uid )
+                res << self.new(_args).save!
+              end
             end
           end
         elsif ts.class == Time
           3.times do |rank|
-            uid = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10).shuffle.pop.unique_id
-            _args = args.merge( rank: rank, score: rank+1, uid: uid )
-            res << self.new(_args).save!
+            uid = 0
+            items = @trend_class.constantize.send(:where, {enterprise_id: enterprise_id}).first(10)
+            if items.count > 0
+              uid = items.shuffle.pop.unique_id
+              _args = args.merge( rank: rank, score: rank+1, uid: uid )
+              res << self.new(_args).save!
+            end
           end
         end
       end
