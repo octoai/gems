@@ -83,13 +83,21 @@ module Octo
       end
     end
 
-    # Returns all the data for a funnel
+    # Returns data for a funnel
     # @return [Octo::FunnelData] The Octo funnel data
-    def data
-      Octo::FunnelData.find_by_enterprise_id_and_funnel_slug(
-        enterprise_id: self.enterprise_id,
-        funnel_slug: self.name_slug
-      )
+    def data(ts = Time.now.floor)
+      args = {
+        enterprise_id: self.enterprise.id,
+        funnel_slug: self.name_slug,
+        ts: ts
+      }
+      res = Octo::FunnelData.where(args)
+      if res.count > 0
+        res.first
+      elsif self.enterprise.fakedata?
+        args.merge!({ value: fake_data(self.funnel.count) })
+        Octo::FunnelData.new(args).save!
+      end
     end
 
     private
