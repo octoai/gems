@@ -1,57 +1,13 @@
 require 'cequel'
 require 'redis'
 
-require 'octocore/models/enterprise'
-require 'octocore/models/enterprise/api_event'
-require 'octocore/models/enterprise/api_hit'
-require 'octocore/models/enterprise/api_track'
-require 'octocore/models/enterprise/app_init'
-require 'octocore/models/enterprise/app_login'
-require 'octocore/models/enterprise/app_logout'
-require 'octocore/models/enterprise/authorization'
-require 'octocore/models/enterprise/category'
-require 'octocore/models/enterprise/category_baseline'
-require 'octocore/models/enterprise/category_hit'
-require 'octocore/models/enterprise/category_trend'
-require 'octocore/models/enterprise/conversions'
-require 'octocore/models/enterprise/ctr'
-require 'octocore/models/enterprise/dimension_choice'
-require 'octocore/models/enterprise/engagement_time'
-require 'octocore/models/enterprise/funnels'
-require 'octocore/models/enterprise/funnel_data'
-require 'octocore/models/enterprise/gcm'
-require 'octocore/models/enterprise/newsfeed_hit'
-require 'octocore/models/enterprise/notification_hit'
-require 'octocore/models/enterprise/page'
-require 'octocore/models/enterprise/pageload_time'
-require 'octocore/models/enterprise/page_view'
-require 'octocore/models/enterprise/product'
-require 'octocore/models/enterprise/product_baseline'
-require 'octocore/models/enterprise/product_hit'
-require 'octocore/models/enterprise/product_page_view'
-require 'octocore/models/enterprise/product_trend'
-require 'octocore/models/enterprise/push_key'
-require 'octocore/models/enterprise/segment.rb'
-require 'octocore/models/enterprise/segment_data.rb'
-require 'octocore/models/enterprise/tag'
-require 'octocore/models/enterprise/tag_hit'
-require 'octocore/models/enterprise/tag_baseline'
-require 'octocore/models/enterprise/tag_trend'
-require 'octocore/models/enterprise/template'
-
-require 'octocore/models/user'
-require 'octocore/models/user/push_token'
-require 'octocore/models/user/user_browser_details'
-require 'octocore/models/user/user_location_history'
-require 'octocore/models/user/user_phone_details'
-require 'octocore/models/user/user_persona'
-require 'octocore/models/user/user_timeline'
-
-require 'octocore/utils'
-
 
 module Cequel
   module Record
+
+    include ActiveModel::Serializers::JSON
+
+    DUMP_ATTRS = [:@attributes] #, :@collection_proxies, :@loaded, :@persisted, :@record_collection]
 
     # Updates caching config
     # @param [String] host The host to connect to
@@ -66,6 +22,21 @@ module Cequel
     # @return [Redis] redis cache instance
     def self.redis
       @redis
+    end
+
+    def marshal_dump
+      DUMP_ATTRS.inject({}) do |val, attr|
+        val[attr] = self.instance_variable_get(attr)
+        val
+      end
+    end
+
+    def marshal_load(data)
+      DUMP_ATTRS.each do |attr|
+        instance_variable_set(attr, data[attr])
+      end
+      instance_variable_set(:@collection_proxies, {})
+      instance_variable_set(:@record_collection, nil)
     end
 
     # Override Cequel::Record here
@@ -180,6 +151,7 @@ module Cequel
       # @return [Cequel::Record::RecordSet] The record matching
       def get_cached(args)
         cache_key = gen_cache_key(args)
+
         begin
           cached_val = Cequel::Record.redis.get(cache_key)
         rescue Exception
@@ -233,3 +205,51 @@ module Cequel
   end
 end
 
+
+require 'octocore/models/enterprise'
+require 'octocore/models/enterprise/api_event'
+require 'octocore/models/enterprise/api_hit'
+require 'octocore/models/enterprise/api_track'
+require 'octocore/models/enterprise/app_init'
+require 'octocore/models/enterprise/app_login'
+require 'octocore/models/enterprise/app_logout'
+require 'octocore/models/enterprise/authorization'
+require 'octocore/models/enterprise/category'
+require 'octocore/models/enterprise/category_baseline'
+require 'octocore/models/enterprise/category_hit'
+require 'octocore/models/enterprise/category_trend'
+require 'octocore/models/enterprise/conversions'
+require 'octocore/models/enterprise/ctr'
+require 'octocore/models/enterprise/dimension_choice'
+require 'octocore/models/enterprise/engagement_time'
+require 'octocore/models/enterprise/funnels'
+require 'octocore/models/enterprise/funnel_data'
+require 'octocore/models/enterprise/gcm'
+require 'octocore/models/enterprise/newsfeed_hit'
+require 'octocore/models/enterprise/notification_hit'
+require 'octocore/models/enterprise/page'
+require 'octocore/models/enterprise/pageload_time'
+require 'octocore/models/enterprise/page_view'
+require 'octocore/models/enterprise/product'
+require 'octocore/models/enterprise/product_baseline'
+require 'octocore/models/enterprise/product_hit'
+require 'octocore/models/enterprise/product_page_view'
+require 'octocore/models/enterprise/product_trend'
+require 'octocore/models/enterprise/push_key'
+require 'octocore/models/enterprise/segment.rb'
+require 'octocore/models/enterprise/segment_data.rb'
+require 'octocore/models/enterprise/tag'
+require 'octocore/models/enterprise/tag_hit'
+require 'octocore/models/enterprise/tag_baseline'
+require 'octocore/models/enterprise/tag_trend'
+require 'octocore/models/enterprise/template'
+
+require 'octocore/models/user'
+require 'octocore/models/user/push_token'
+require 'octocore/models/user/user_browser_details'
+require 'octocore/models/user/user_location_history'
+require 'octocore/models/user/user_phone_details'
+require 'octocore/models/user/user_persona'
+require 'octocore/models/user/user_timeline'
+
+require 'octocore/utils'

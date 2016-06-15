@@ -10,7 +10,7 @@ module Octo
       #   stream
       # @param [Object] record Any object to be serialized
       def serialize(record)
-        Marshal::dump(record)
+        Marshal::dump(record).to_s
       end
 
       # Deserialize a data.
