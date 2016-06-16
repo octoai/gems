@@ -14,6 +14,7 @@ module Octo
     has_many :segments, class_name: 'Octo::Segment'
     has_many :templates, class_name: 'Octo::Template'
     has_many :funnels, class_name: 'Octo::Funnel'
+    has_many :conversions, class_name: 'Octo::Conversions'
 
     after_save :_setup
 
