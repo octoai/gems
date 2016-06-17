@@ -17,10 +17,11 @@ module Octo
       #   ready
       # @return [Set<Symbol>] Set of api_events
       def api_events
-        Set.new(%w(app.init app.login app.logout page.view productpage.view))
+        Set.new(%w(app.init app.login app.logout page.view productpage.view update.profile))
       end
 
       def handle(msg)
+        msg_dump = msg
         msg = parse(msg)
 
         eventName = msg.delete(:event_name)
@@ -43,7 +44,7 @@ module Octo
 
           Octo::ApiTrack.new(customid: msg[:id],
                             created_at: Time.now,
-                            json_dump: msg,
+                            json_dump: msg_dump,
                             type: eventName).save!
 
           case eventName
@@ -83,10 +84,13 @@ module Octo
                                        product_id: product.id
               ).save!
               updateUserDeviceDetails(user, msg)
-              hook_opts.merge!({
-                                   product: product,
-                                   categories: categories,
-                                   tags: tags })
+              hook_opts.merge!({ product: product,
+                                 categories: categories,
+                                 tags: tags })
+              call_hooks(eventName, hook_opts)
+            when 'update.profile'
+              checkUserProfileDetails(enterprise, user, msg)
+              updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'update.push_token'
               checkPushToken(enterprise, user, msg)
@@ -107,6 +111,23 @@ module Octo
         Octo::Callbacks.run_hook(hook, *args)
       end
 
+      def checkUserProfileDetails(enterprise, user, msg)
+        args = {
+          user_id: user.id,
+          user_enterprise_id: enterprise.id,
+          email: msg[:profileDetails].fetch('email')
+        }
+        opts = {
+          username: msg[:profileDetails].fetch('username', ''),
+          gender: msg[:profileDetails].fetch('gender', ''),
+          dob: msg[:profileDetails].fetch('dob', ''),
+          alternate_email: msg[:profileDetails].fetch('alternate_email', ''),
+          mobile: msg[:profileDetails].fetch('mobile', ''),
+          extras: msg[:profileDetails].fetch('extras', '{}').to_s
+        }
+        Octo::UserProfileDetails.findOrCreateOrUpdate(args, opts)
+      end
+
       # Checks for push tokens and creates or updates it
       # @param [Octo::Enterprise] enterprise The Enterprise object
       # @param [Octo::User] user The user to whom this token belongs to
@@ -114,12 +135,12 @@ module Octo
       # @return [Octo::PushToken] The push token object corresponding to this user
       def checkPushToken(enterprise, user, msg)
         args = {
-            user_id: user.id,
-            user_enterprise_id: enterprise.id,
-            push_type: msg[:pushType].to_i
+          user_id: user.id,
+          user_enterprise_id: enterprise.id,
+          push_type: msg[:pushType].to_i
         }
         opts = {
-            pushtoken: msg[:pushToken]
+          pushtoken: msg[:pushToken]
         }
         Octo::PushToken.findOrCreateOrUpdate(args, opts)
       end
@@ -313,26 +334,30 @@ module Octo
             created_at:     Time.now
         }
         case msg['event_name']
+          when 'update.profile'
+            m.merge!({
+                        profileDetails: msg['profileDetails']
+                    })
           when 'page.view'
             m.merge!({
-                         routeUrl:     msg['routeUrl'],
-                         categories:   msg['categories'],
-                         tags:         msg['tags']
+                        routeUrl:     msg['routeUrl'],
+                        categories:   msg['categories'],
+                        tags:         msg['tags']
                      })
           when 'productpage.view'
             m.merge!({
-                         routeUrl:     msg['routeUrl'],
-                         categories:   msg['categories'],
-                         tags:         msg['tags'],
-                         productId:    msg['productId'],
-                         productName:  msg['productName'],
-                         price:        msg['price']
+                        routeUrl:     msg['routeUrl'],
+                        categories:   msg['categories'],
+                        tags:         msg['tags'],
+                        productId:    msg['productId'],
+                        productName:  msg['productName'],
+                        price:        msg['price']
                      })
           when 'update.push_token'
             m.merge!({
-                         pushType:     msg['notificationType'],
-                         pushKey:      msg['pushKey'],
-                         pushToken:    msg['pushToken']
+                        pushType:     msg['notificationType'],
+                        pushKey:      msg['pushKey'],
+                        pushToken:    msg['pushToken']
                      })
         end
         m

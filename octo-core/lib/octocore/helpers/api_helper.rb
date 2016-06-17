@@ -39,13 +39,13 @@ module Octo
       def process_request(event_name)
         postparams = post_params
         opts = {
-            event_name: event_name,
-            enterprise: enterprise_details,
-            uuid: uuid
+          event_name: event_name,
+          enterprise: enterprise_details,
+          uuid: uuid
         }
         postparams.merge!(opts)
         settings.kafka_bridge.push(postparams)
-        { eventId: opts[:uuid]}.to_json
+        {eventId: opts[:uuid]}.to_json
       end
 
     end
