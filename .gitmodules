@@ -1,0 +1,4 @@
+[submodule "octo-core/lib/octocore/config/core"]
+	path = octo-core/lib/octocore/config/core
+	url = http://phab.octo.ai/diffusion/CONFIG/config.git
+	branch = local

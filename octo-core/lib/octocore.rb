@@ -36,6 +36,35 @@ module Octo
     self.connect(config)
   end
 
+  # Connect by reading configuration files from the given directory.
+  #   In this case, all *.y*ml files would be read in
+  #   Dir.glob order and merged into one unified config
+  def self.connect_with_config_dir(config_dir)
+    config = {}
+    Dir[config_dir + '/**/*.y*ml'].each do |file|
+      _config = YAML.load_file file
+      if _config
+        $stdout.puts "Loading from Config file: #{ file }"
+        config.merge!(_config.deep_symbolize_keys)
+      else
+        $stdout.puts "Not Loading from Config file: #{ file }"
+      end
+    end
+    self.connect config
+  end
+
+  # Provides a unified interface to #connect_with_config_dir
+  #   and #connect_with_config_file for convenience
+  def self.connect_with(location)
+    if File.directory?(location)
+      self.connect_with_config_dir location
+    elsif File.file?(location)
+      self.connect_with_config_file location
+    else
+      puts "Invalid location #{ location }"
+    end
+  end
+
 
   # A low level method to connect using a configuration
   # @param [Hash] configuration The configuration hash
@@ -46,7 +75,7 @@ module Octo
     self.logger.info('Octo booting up.')
 
     # Establish Cequel Connection
-    connection = Cequel.connect(configuration)
+    connection = Cequel.connect(Octo.get_config(:cassandra))
     Cequel::Record.connection = connection
 
     # Establish connection to cache server
@@ -60,7 +89,7 @@ module Octo
     if configuration.has_key?(:statsd)
       statsd_config = configuration[:statsd]
       set_config :stats, Statsd.new(*statsd_config.values)
-      end
+    end
 
     self.logger.info('I\'m connected now.')
     require 'octocore/callbacks'

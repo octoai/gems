@@ -183,7 +183,7 @@ def _main(config_file)
   }
 
   # connect Octo and start the show
-  Octo.connect_with_config_file config_file
+  Octo.connect_with config_file
   streamer = Octo::FakeStream.new
   streamer.stream_forever
 end
@@ -194,7 +194,7 @@ def main
                 else
                   spec = Gem::Specification.find_by_name('octocore')
                   gem_root = spec.gem_dir
-                  File.join(gem_root, 'lib', 'octocore' ,'config', 'config.yml')
+                  File.join(gem_root, 'lib', 'octocore' ,'config')
                 end
   puts config_file
   if File.exist?config_file
