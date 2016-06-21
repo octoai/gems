@@ -9,12 +9,17 @@ require 'octocore/config'
 RSpec::Core::RakeTask.new('spec')
 
 task :environment do
-  config_file = 'lib/octocore/config/config.yml'
-  config = YAML.load_file(config_file).deep_symbolize_keys
-
+  config_dir = 'lib/octocore/config'
+  config = {}
+  Dir['**{,/*/**}/*.yml'].each do |file|
+    _config = YAML.load_file(file)
+    if _config
+      puts "loading from file: #{ file }"
+      config.merge!(_config.deep_symbolize_keys)
+    end
+  end
   Octo.load_config config
-
-  connection = Cequel.connect(config)
+  connection = Cequel.connect(Octo.get_config(:cassandra))
   Cequel::Record.connection = connection
 end
 

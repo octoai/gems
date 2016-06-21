@@ -41,13 +41,22 @@ module Octo
   #   Dir.glob order and merged into one unified config
   def self.connect_with_config_dir(config_dir)
     config = {}
-    Dir[config_dir + '/**/*.y*ml'].each do |file|
-      _config = YAML.load_file file
-      if _config
-        $stdout.puts "Loading from Config file: #{ file }"
-        config.merge!(_config.deep_symbolize_keys)
-      else
-        $stdout.puts "Not Loading from Config file: #{ file }"
+    accepted_formats = Set.new(['.yaml', '.yml'])
+    Dir[config_dir + '/*'].each do |file_obj|
+      if File.file?(file_obj) and accepted_formats.include?File.extname(file_obj)
+        _config = YAML.load_file(file_obj)
+        if _config
+          $stdout.puts "Loading from Config file: #{ file_obj }"
+          config.merge!(_config.deep_symbolize_keys)
+        end
+      elsif File.directory?(file_obj)
+        Dir[file_obj + '/**/*.y*ml'].each do |file|
+          _config = YAML.load_file file
+          if _config
+            $stdout.puts "Loading from Config file: #{ file }"
+            config.merge!(_config.deep_symbolize_keys)
+          end
+        end
       end
     end
     self.connect config
