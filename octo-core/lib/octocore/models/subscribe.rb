@@ -1,12 +1,12 @@
 require 'cequel'
-
+# Model for Subscribe to us (in the footer), on the microsite
 module Octo
 
-  class Subscribe
+  class Subscriber
     include Cequel::Record
 
     key :email, :text
-    column :created_at, :timestamp
+    key :created_at, :timestamp
 
   end
 end
