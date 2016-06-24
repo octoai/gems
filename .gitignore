@@ -4,3 +4,4 @@
 .idea/
 build/
 *.iml
+octo-core/lib/octocore/config/config
