@@ -50,7 +50,7 @@ module Octo
           config.merge!(_config.deep_symbolize_keys)
         end
       elsif File.directory?(file_obj)
-        Dir[file_obj + '/**/*.y*ml'].each do |file|
+        Dir[file_obj + '/config/*.y*ml'].each do |file|
           _config = YAML.load_file file
           if _config
             $stdout.puts "Loading from Config file: #{ file }"
