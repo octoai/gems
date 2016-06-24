@@ -1,3 +1,5 @@
+require 'ruby-kafka'
+
 module Octo
   # The bridge between Kafka and ruby
   class KafkaBridge
@@ -17,7 +19,7 @@ module Octo
 
     def initialize(opts = {})
       opts.deep_symbolize_keys!
-      @kafka = Kafka.new(seed_brokers: opts.fetch(:brokers, BROKERS),
+      @kafka = ::Kafka.new(seed_brokers: opts.fetch(:brokers, BROKERS),
                          client_id: opts.fetch(:client_id, CLIENT_ID)
       )
       @producer = @kafka.async_producer(

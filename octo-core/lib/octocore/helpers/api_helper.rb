@@ -45,7 +45,7 @@ module Octo
         }
         postparams.merge!(opts)
         settings.kafka_bridge.push(postparams)
-        {eventId: opts[:uuid]}.to_json
+        { eventId: opts[:uuid] }.to_json
       end
 
     end
