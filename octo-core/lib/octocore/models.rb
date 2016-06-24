@@ -254,4 +254,7 @@ require 'octocore/models/user/user_phone_details'
 require 'octocore/models/user/user_profile'
 require 'octocore/models/user/user_timeline'
 
+require 'octocore/models/subscribe'
+require 'octocore/models/contactus'
+
 require 'octocore/utils'

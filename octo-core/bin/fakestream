@@ -17,11 +17,18 @@ module Octo
 
     MAX_USERS = 100
 
+    MAX_PAGES = 30
     MAX_PRODUCTS = 200
 
     MAX_CATEGORIES = 10
 
     MAX_TAGS = 15
+
+
+
+
+    #How many no. of pages to view before going to product page
+    MAX_PAGES_TO_VISIT = 3
 
     # Initialize with the URL
     def initialize
@@ -34,8 +41,19 @@ module Octo
       # simulate an app login
       app_init user
 
+      # simulate a random number of page views before going to product
+      for i in 1..(1+rand(MAX_PAGES_TO_VISIT))
+        pv user, fakepage(user.enterprise)
+      end
+
       # simulate a product page view
       ppv user, fakeproduct(user.enterprise)
+
+      #visit a page or not after going to the product page
+      for i in 0..rand(2)
+        pv user, fakepage(user.enterprise)
+      end
+
     end
 
     def stream_forever
@@ -56,6 +74,21 @@ module Octo
       url = '/events/app.init/'
       post(url, key, payload)
     end
+
+    # Create a page view request
+    def pv(user, page)
+      payload = {
+          userId: user.id,
+          phoneDetails: phonedetails,
+          routeUrl: page.routeurl,
+          categories: fakecategories,
+          tags: faketags,
+      }
+      key = apikey user.enterprise
+      url = '/events/page.view/'
+      post(url, key, payload)
+    end
+
 
     # Create a product page view request
     def ppv(user, product)
@@ -94,19 +127,33 @@ module Octo
                      id: rand(MAX_USERS))
     end
 
+    # Generates a fake page for the enterprise
+    # @param [Octo::Enterprise] enterprise
+    # @return [Octo::Product]
+    def fakepage(enterprise)
+      id = rand(MAX_PAGES)
+      Octo::Page.new(
+          enterprise_id: enterprise.id,
+          routeurl: "/PageUrl/#{ id }",
+          categories: fakecategories,
+          tags: faketags
+      )
+    end
+
+
     # Generates a fake product for the enterprise
     # @param [Octo::Enterprise] enterprise
     # @return [Octo::Product]
     def fakeproduct(enterprise)
       id = rand(MAX_PRODUCTS)
       Octo::Product.new(
-                       enterprise_id: enterprise.id,
-                       id: id,
-                       price: rand(10000).to_f,
-                       name: "Fake Product #{ id }",
-                       routeurl: "/Some/Url/#{ id }",
-                       categories: fakecategories,
-                       tags: faketags
+          enterprise_id: enterprise.id,
+          id: id,
+          price: rand(10000).to_f,
+          name: "Fake Product #{ id }",
+          routeurl: "/Some/Url/#{ id }",
+          categories: fakecategories,
+          tags: faketags
       )
     end
 

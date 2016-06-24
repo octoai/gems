@@ -8,5 +8,6 @@ module Octo
 
     key :created_at, :timestamp
     key :userid, :bigint
+
   end
 end

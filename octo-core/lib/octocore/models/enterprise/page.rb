@@ -6,7 +6,7 @@ module Octo
 
     belongs_to :enterprise, class_name: 'Octo::Enterprise'
 
-    key :routeUrl, :text
+    key :routeurl, :text
 
     set :categories, :text
     set :tags, :text

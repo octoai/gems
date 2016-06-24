@@ -71,7 +71,7 @@ module Octo
               Octo::PageView.new(enterprise: enterprise,
                                  created_at: Time.now,
                                  userid: user.id,
-                                 routeUrl: page.routeUrl
+                                 routeurl: page.routeurl
               ).save!
               updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
@@ -250,7 +250,7 @@ module Octo
 
         args = {
             enterprise_id: enterprise.id,
-            routeUrl: msg[:routeUrl]
+            routeurl: msg[:routeUrl]
         }
         opts = {
             categories: Set.new(msg[:categories]),
