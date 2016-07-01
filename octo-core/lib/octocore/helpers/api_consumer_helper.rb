@@ -345,14 +345,14 @@ module Octo
           when 'page.view'
             m.merge!({
                         routeUrl:     msg['routeUrl'],
-                        categories:   msg['categories'],
-                        tags:         msg['tags']
+                        categories:   msg.fetch('categories', []),
+                        tags:         msg.fetch('tags', [])
                      })
           when 'productpage.view'
             m.merge!({
                         routeUrl:     msg['routeUrl'],
-                        categories:   msg['categories'],
-                        tags:         msg['tags'],
+                        categories:   msg.fetch('categories', []),
+                        tags:         msg.fetch('tags', []),
                         productId:    msg['productId'],
                         productName:  msg['productName'],
                         price:        msg['price']
