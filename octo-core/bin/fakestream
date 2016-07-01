@@ -7,7 +7,6 @@
 
 require 'net/http'
 require 'json'
-
 require 'octocore'
 
 module Octo
@@ -23,8 +22,6 @@ module Octo
     MAX_CATEGORIES = 10
 
     MAX_TAGS = 15
-
-
 
 
     #How many no. of pages to view before going to product page
