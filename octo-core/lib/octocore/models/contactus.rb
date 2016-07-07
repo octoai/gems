@@ -1,5 +1,6 @@
 require 'cequel'
-# Model for contavt us page on the microsite
+
+# Model for contact us page on the microsite
 module Octo
   class ContactUs
     include Cequel::Record
@@ -12,6 +13,17 @@ module Octo
     column :lastname, :text
     column :message, :text
 
+    after_create :send_email
+
+    # Send Email after model save
+    def send_email
+      :subject = 'Octo - Contact Us'
+    	opts = {
+    		text: self.message,
+    		name: self.firstname + ' ' + self.lastname
+    	}
+    	Octo::Email.send(self.email, :subject, opts)
+    end
 
   end
 end
