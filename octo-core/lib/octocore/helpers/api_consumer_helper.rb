@@ -290,9 +290,11 @@ module Octo
       # @param [Array<String>] categories An array of categories to be checked
       # @return [Array<Octo::Category>] An array of categories object
       def checkCategories(enterprise, categories)
-        categories.collect do |category|
-          Octo::Category.findOrCreate({enterprise_id: enterprise.id,
-                                       cat_text: category})
+        if categories
+          categories.collect do |category|
+            Octo::Category.findOrCreate({enterprise_id: enterprise.id,
+                                         cat_text: category})
+          end
         end
       end
 
@@ -301,8 +303,10 @@ module Octo
       # @param [Array<String>] tags An array of tags to be checked
       # @return [Array<Octo::Tag>] An array of tags object
       def checkTags(enterprise, tags)
-        tags.collect do |tag|
-          Octo::Tag.findOrCreate({enterprise_id: enterprise.id, tag_text: tag})
+        if tags
+          tags.collect do |tag|
+            Octo::Tag.findOrCreate({enterprise_id: enterprise.id, tag_text: tag})
+          end
         end
       end
 
@@ -341,14 +345,14 @@ module Octo
           when 'page.view'
             m.merge!({
                         routeUrl:     msg['routeUrl'],
-                        categories:   msg['categories'],
-                        tags:         msg['tags']
+                        categories:   msg.fetch('categories', []),
+                        tags:         msg.fetch('tags', [])
                      })
           when 'productpage.view'
             m.merge!({
                         routeUrl:     msg['routeUrl'],
-                        categories:   msg['categories'],
-                        tags:         msg['tags'],
+                        categories:   msg.fetch('categories', []),
+                        tags:         msg.fetch('tags', []),
                         productId:    msg['productId'],
                         productName:  msg['productName'],
                         price:        msg['price']

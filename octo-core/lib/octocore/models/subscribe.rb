@@ -1,4 +1,5 @@
 require 'cequel'
+
 # Model for Subscribe to us (in the footer), on the microsite
 module Octo
 

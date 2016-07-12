@@ -35,6 +35,7 @@ DESC
   s.add_runtime_dependency 'hooks', '~> 0.4.1', '>= 0.4.1'
   s.add_runtime_dependency 'json', '~> 1.8.1', '>= 1.8.1'
   s.add_runtime_dependency 'ruby-kafka', '~> 0.3.2', '>= 0.3.2'
+  s.add_runtime_dependency 'mandrill-api', '~> 1.0', '>= 1.0.53'
 
   s.add_development_dependency 'rspec', '~> 3.4.0', '>= 3.4.0'
   s.add_development_dependency 'parallel_tests', '~> 2.5.0', '>= 2.5.0'

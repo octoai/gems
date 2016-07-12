@@ -7,6 +7,7 @@ PATH
       hiredis (~> 0.6.1, >= 0.6.0)
       hooks (~> 0.4.1, >= 0.4.1)
       json (~> 1.8.1, >= 1.8.1)
+      mandrill-api (~> 1.0, >= 1.0.53)
       rake (~> 11.1.0, >= 11.1.0)
       redis (~> 3.2.2, >= 3.2.0)
       resque (~> 1.26.0, >= 1.26.0)
@@ -34,12 +35,16 @@ GEM
       cassandra-driver (~> 2.0)
     descriptive_statistics (2.5.1)
     diff-lcs (1.2.5)
+    excon (0.50.1)
     hiredis (0.6.1)
     hooks (0.4.1)
       uber (~> 0.0.14)
     i18n (0.7.0)
     ione (1.2.3)
     json (1.8.3)
+    mandrill-api (1.0.53)
+      excon (>= 0.16.0, < 1.0)
+      json (>= 1.7.7, < 2.0)
     minitest (5.9.0)
     mono_logger (1.1.0)
     multi_json (1.12.1)
@@ -101,4 +106,4 @@ DEPENDENCIES
   rspec (~> 3.4.0, >= 3.4.0)
 
 BUNDLED WITH
-   1.11.2
+   1.12.5
