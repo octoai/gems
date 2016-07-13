@@ -3,10 +3,11 @@ require 'yaml'
 require 'logger'
 
 require 'octocore/version'
+require 'octocore/utils'
 require 'octocore/config'
 require 'octocore/models'
 require 'octocore/counter'
-require 'octocore/utils'
+
 require 'octocore/trendable'
 require 'octocore/baseline'
 require 'octocore/trends'
@@ -54,11 +55,24 @@ module Octo
           _config = YAML.load_file file
           if _config
             $stdout.puts "Loading from Config file: #{ file }"
-            config.merge!(_config.deep_symbolize_keys)
+            # A little bit of hack here.
+            # This hack makes sure that if we load config files from nestes
+            # directories, the corresponding config is loaded in
+            # hierarchy.
+            # So, if the file is like /config/search/index.yml, the
+            # key would be like [config[search[index]]]
+            a = file.gsub(/(\/?#{config_dir}(\/)*(config\/)*|.yml)/, '').split('/')
+            _true_config = a.reverse.inject(_config) { |r,e| { e => r } }
+            config = config.deep_merge(_true_config.deep_symbolize_keys)
           end
         end
       end
     end
+    # As a cleanup step, merge the values of key named "config"
+    # with the global config hash
+    configConfig = config.delete(:config)
+    config = config.deep_merge(configConfig)
+    # Now, good to merge the two
     self.connect config
   end
 
@@ -102,6 +116,7 @@ module Octo
 
     self.logger.info('I\'m connected now.')
     require 'octocore/callbacks'
+    require 'octocore/search'
 
     self.logger.info('Setting callbacks.')
 
