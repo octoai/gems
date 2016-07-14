@@ -18,9 +18,12 @@ module Octo
         message = {
           from_name: Octo.get_config(:email_sender).fetch(:name),  
           from_email: Octo.get_config(:email_sender).fetch(:email),
+
           subject: subject,
+
           text: opts.fetch('text', nil),
           html: opts.fetch('html', nil),
+
           to: [{
             email: email,
             name: opts.fetch('name', nil)

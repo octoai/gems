@@ -54,6 +54,18 @@ module Octo
         end
       end
 
+      def schedule_subscribermail
+        name = 'SubscriberDailyMailer'
+        config = {
+            class: Octo::Mailer::SubscriberMailer,
+            args: [],
+            cron: '* * * * *',
+            persist: true,
+            queue: 'subscriber_notifier'
+        }
+        Resque.set_schedule name, config
+      end
+
     end
   end
 end

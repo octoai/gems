@@ -52,6 +52,11 @@ module Octo
               Octo::AppInit.new(enterprise: enterprise,
                                 created_at: Time.now,
                                 userid: user.id).save!
+              Octo::FunnelTracker.new(enterprise: enterprise,
+                                      userid: user.id,
+                                      created_at: Time.now,
+                                      type: 'init'
+              ).save!
               updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'app.login'
@@ -73,6 +78,11 @@ module Octo
                                  userid: user.id,
                                  routeurl: page.routeurl
               ).save!
+              Octo::FunnelTracker.new(enterprise: enterprise,
+                                      userid: user.id,
+                                      created_at: Time.now,
+                                      type: page.routeurl
+              ).save!
               updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'productpage.view'
@@ -82,6 +92,11 @@ module Octo
                                        created_at: Time.now,
                                        userid: user.id,
                                        product_id: product.id
+              ).save!
+              Octo::FunnelTracker.new(enterprise: enterprise,
+                                      userid: user.id,
+                                      created_at: Time.now,
+                                      type: product.routeurl
               ).save!
               updateUserDeviceDetails(user, msg)
               hook_opts.merge!({ product: product,

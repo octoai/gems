@@ -13,7 +13,10 @@ require 'octocore/baseline'
 require 'octocore/trends'
 require 'octocore/kldivergence'
 require 'octocore/segment'
+# Mailer and scheduler should always be required in the following order
+require 'octocore/mailer'
 require 'octocore/scheduler'
+
 require 'octocore/schedeuleable'
 require 'octocore/helpers'
 require 'octocore/kafka_bridge'

@@ -6,8 +6,8 @@ module Octo
   class Subscriber
     include Cequel::Record
 
-    key :email, :text
     key :created_at, :timestamp
+    key :email, :text
 
   end
 end
