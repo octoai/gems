@@ -123,7 +123,6 @@ module Octo
 
     self.logger.info('I\'m connected now.')
     require 'octocore/callbacks'
-    require 'octocore/search'
 
     self.logger.info('Setting callbacks.')
 
