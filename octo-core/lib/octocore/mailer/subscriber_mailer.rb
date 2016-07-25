@@ -12,13 +12,13 @@ module Octo
         end
         puts subscribers.length
         #   MAIL CODE
-        Octo.get_config(:email_to).each { |x|
-          opts1 = {
-              text: "Today number of new susbcribes are " + subscribers.length,
-              name: x.fetch('name')
-          }
-          Octo::Email.send(x.fetch('email'), subject, opts1)
-        }
+        # Octo.get_config(:email_to).each { |x|
+        #   opts1 = {
+        #       text: "Today number of new susbcribes are " + subscribers.length,
+        #       name: x.fetch('name')
+        #   }
+        #   Octo::Email.send(x.fetch('email'), subject, opts1)
+        # }
         end
       end
   end

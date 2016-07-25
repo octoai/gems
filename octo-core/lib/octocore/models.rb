@@ -70,6 +70,7 @@ module Cequel
         end
         res.flatten
       end
+
       # Recreates this object from other object
       def recreate_from(obj)
         keys = self.key_column_names
@@ -154,8 +155,6 @@ module Cequel
       end
 
 
-
-
       # Perform a cache backed get
       # @param [Hash] args The arguments hash for the record
       #   to be found
@@ -215,7 +214,6 @@ module Cequel
     end
   end
 end
-
 
 
 require 'octocore/models/enterprise'
