@@ -6,7 +6,7 @@ require 'octocore/version'
 require 'octocore/config'
 require 'octocore/models'
 require 'octocore/counter'
-require 'octocore/email'
+# require 'octocore/email'
 require 'octocore/utils'
 
 require 'octocore/trendable'
