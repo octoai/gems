@@ -15,6 +15,9 @@ module Octo
 
       # Define the after_app_init hook
       after_app_init do |args|
+        # Not sure if we need to add init to
+        # redis session
+        # add_session args
         update_counters args
       end
 
@@ -30,11 +33,13 @@ module Octo
 
       # Define the after_page_view hook
       after_page_view do |args|
+        add_session args
         update_counters args
       end
 
       # Define the after_productpage_view hook
       after_productpage_view do |args|
+        add_session args
         update_counters args
       end
     end
@@ -64,8 +69,22 @@ module Octo
           Octo::ApiHit.increment_for(opts[:event])
         end
       end
-    end
+      # Adds user session for page_view and
+      # product_page_view to redis.
+      # It self expires in n seconds from last hit
+      def add_session(opts)
+        if opts.has_key?(:type)
+          # create a shadow key for every list
+          # this helps us in catching the event
+          # when a key expires, and then we
+          # delete the main key with the session details
+          # after playing around with the value of the key
+          Cequel::Record.redis.setex("shadow:" + opts[:enterprise].id.to_s + "_" + opts[:user].id.to_s,Octo.get_config(:session_length),"")
+          Cequel::Record.redis.rpush(opts[:enterprise].id.to_s + "_" + opts[:user].id.to_s, opts[:type].to_s)
+        end
+      end
 
+    end
   end
 
   # The class responsible for handling callbacks.
@@ -73,6 +92,5 @@ module Octo
   class Callbacks
     include Hooks
     include Octo::OctoHooks
-
   end
 end

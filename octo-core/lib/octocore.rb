@@ -3,17 +3,20 @@ require 'yaml'
 require 'logger'
 
 require 'octocore/version'
-require 'octocore/utils'
 require 'octocore/config'
 require 'octocore/models'
 require 'octocore/counter'
-
+require 'octocore/email'
+require 'octocore/utils'
 require 'octocore/trendable'
 require 'octocore/baseline'
 require 'octocore/trends'
 require 'octocore/kldivergence'
 require 'octocore/segment'
+# Mailer and scheduler should always be required in the following order
+require 'octocore/mailer'
 require 'octocore/scheduler'
+
 require 'octocore/schedeuleable'
 require 'octocore/helpers'
 require 'octocore/kafka_bridge'
@@ -45,42 +48,22 @@ module Octo
     accepted_formats = Set.new(['.yaml', '.yml'])
     Dir[config_dir + '/*'].each do |file_obj|
       if File.file?(file_obj) and accepted_formats.include?File.extname(file_obj)
-        config = self.true_load(config, file_obj, config_dir)
+        _config = YAML.load_file(file_obj)
+        if _config
+          $stdout.puts "Loading from Config file: #{ file_obj }"
+          config.merge!(_config.deep_symbolize_keys)
+        end
       elsif File.directory?(file_obj)
         Dir[file_obj + '/**/*.y*ml'].each do |file|
-          config = self.true_load(config, file, config_dir)
+          _config = YAML.load_file file
+          if _config
+            $stdout.puts "Loading from Config file: #{ file }"
+            config.merge!(_config.deep_symbolize_keys)
+          end
         end
       end
     end
-    # As a cleanup step, merge the values of key named "config"
-    # with the global config hash
-    configConfig = config.delete(:config)
-    config = config.deep_merge(configConfig)
-    # Now, good to merge the two
     self.connect config
-  end
-
-  # Loads the true config. The true config is the hierarchial config
-  # @param [Hash] config The base config. Loaded config will be deep merged
-  #   with this
-  # @param [String] file The file from which config should be loaded
-  # @param [String] config_fir The config dir in which the file is located
-  # @return [Hash] The merged config hash
-  def self.true_load(config, file, config_dir)
-    _config = YAML.load_file file
-    if _config
-      $stdout.puts "Loading from Config file: #{ file }"
-      # A little bit of hack here.
-      # This hack makes sure that if we load config files from nestes
-      # directories, the corresponding config is loaded in
-      # hierarchy.
-      # So, if the file is like /config/search/index.yml, the
-      # key would be like [config[search[index]]]
-      a = file.gsub(/(\/?#{config_dir}(\/)*(config\/)*|.yml)/, '').split('/')
-      _true_config = a.reverse.inject(_config) { |r,e| { e => r } }
-      config = config.deep_merge(_true_config.deep_symbolize_keys)
-    end
-    config
   end
 
   # Provides a unified interface to #connect_with_config_dir

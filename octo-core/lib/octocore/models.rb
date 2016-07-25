@@ -70,7 +70,6 @@ module Cequel
         end
         res.flatten
       end
-
       # Recreates this object from other object
       def recreate_from(obj)
         keys = self.key_column_names
@@ -145,6 +144,18 @@ module Cequel
         res
       end
 
+
+      # If a record exists in a COUNTER TABLE, it will find
+      #  it and increment or decrement it's value with the
+      #  provided options. Else, will just create the
+      #  record with default value.
+      def findOrCreateOrAdjust(args, options)
+        self.where(args).data_set.increment(options)
+      end
+
+
+
+
       # Perform a cache backed get
       # @param [Hash] args The arguments hash for the record
       #   to be found
@@ -206,6 +217,7 @@ module Cequel
 end
 
 
+
 require 'octocore/models/enterprise'
 require 'octocore/models/enterprise/api_event'
 require 'octocore/models/enterprise/api_hit'
@@ -224,6 +236,8 @@ require 'octocore/models/enterprise/dimension_choice'
 require 'octocore/models/enterprise/engagement_time'
 require 'octocore/models/enterprise/funnels'
 require 'octocore/models/enterprise/funnel_data'
+require 'octocore/models/enterprise/funnel_tracker'
+
 require 'octocore/models/enterprise/gcm'
 require 'octocore/models/enterprise/newsfeed_hit'
 require 'octocore/models/enterprise/notification_hit'
