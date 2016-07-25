@@ -5,7 +5,7 @@ module Octo
   module Helpers
 
     module ApiConsumerHelper
-
+      extend Cequel::Metal
       # Get all the valid events
       # @return [Set<Symbol>] Valid events globally
       def valid_events
@@ -14,7 +14,7 @@ module Octo
 
       # Get the API events. These are the ones that the client is billed for
       #   This should eventually be placed under kong helpers when that is
-      #   ready
+      #   ready.
       # @return [Set<Symbol>] Set of api_events
       def api_events
         Set.new(%w(app.init app.login app.logout page.view productpage.view update.profile))
@@ -23,10 +23,8 @@ module Octo
       def handle(msg)
         msg_dump = msg
         msg = parse(msg)
-
         eventName = msg.delete(:event_name)
-
-        if valid_events.include?eventName
+        if (valid_events.include?eventName)
           enterprise = checkEnterprise(msg)
           unless enterprise
             Octo.logger.info 'Unable to find enterprise. Something\'s wrong'
@@ -40,24 +38,19 @@ module Octo
 
           if api_events.include?eventName
             hook_opts[:event] = register_api_event(enterprise, eventName)
+            Octo::ApiTrack.new(customid: msg[:id],
+                               created_at: Time.now,
+                               json_dump: msg_dump,
+                               type: eventName).save!
           end
-
-          Octo::ApiTrack.new(customid: msg[:id],
-                            created_at: Time.now,
-                            json_dump: msg_dump,
-                            type: eventName).save!
 
           case eventName
             when 'app.init'
               Octo::AppInit.new(enterprise: enterprise,
                                 created_at: Time.now,
                                 userid: user.id).save!
-              Octo::FunnelTracker.new(enterprise: enterprise,
-                                      userid: user.id,
-                                      created_at: Time.now,
-                                      type: 'init'
-              ).save!
               updateUserDeviceDetails(user, msg)
+              hook_opts.merge!({type: 'init'})
               call_hooks(eventName, hook_opts)
             when 'app.login'
               Octo::AppLogin.new(enterprise: enterprise,
@@ -78,30 +71,23 @@ module Octo
                                  userid: user.id,
                                  routeurl: page.routeurl
               ).save!
-              Octo::FunnelTracker.new(enterprise: enterprise,
-                                      userid: user.id,
-                                      created_at: Time.now,
-                                      type: page.routeurl
-              ).save!
+              hook_opts.merge!({type: page.routeurl})
               updateUserDeviceDetails(user, msg)
               call_hooks(eventName, hook_opts)
             when 'productpage.view'
               product, categories, tags = checkProduct(enterprise, msg)
               Octo::ProductPageView.new(
-                                       enterprise: enterprise,
-                                       created_at: Time.now,
-                                       userid: user.id,
-                                       product_id: product.id
-              ).save!
-              Octo::FunnelTracker.new(enterprise: enterprise,
-                                      userid: user.id,
-                                      created_at: Time.now,
-                                      type: product.routeurl
+                  enterprise: enterprise,
+                  created_at: Time.now,
+                  userid: user.id,
+                  product_id: product.id
               ).save!
               updateUserDeviceDetails(user, msg)
               hook_opts.merge!({ product: product,
                                  categories: categories,
-                                 tags: tags })
+                                 tags: tags,
+                                 type: product.routeurl
+                               })
               call_hooks(eventName, hook_opts)
             when 'update.profile'
               checkUserProfileDetails(enterprise, user, msg)
@@ -110,6 +96,15 @@ module Octo
             when 'update.push_token'
               checkPushToken(enterprise, user, msg)
               checkPushKey(enterprise, msg)
+            when 'funnel_update'
+              sessionList = Cequel::Record.redis.lrange(msg[:rediskey],0,-1)
+              Cequel::Record.redis.del(msg[:rediskey])
+              sessionList.each_index{ |index|
+                if index!=(sessionList.length-1)
+                  checkFunnelTracker(enterprise,sessionList[index],sessionList[index+1])
+                end
+              }
+
           end
         end
       end
@@ -125,20 +120,39 @@ module Octo
         hook = [:after, event.gsub('.', '_')].join('_').to_sym
         Octo::Callbacks.run_hook(hook, *args)
       end
+      def checkFunnelTracker(enterprise,page1,page2)
+        args_to = {
+            enterprise_id: enterprise.id,
+            p1: page1,
+            direction:1,
+            p2: page2
+        }
+        args_from = {
+            enterprise_id: enterprise.id,
+            p1: page2,
+            direction: 0,
+            p2: page1
+        }
+        counters = {
+            weight:1,
+        }
+        Octo::FunnelTracker.findOrCreateOrAdjust(args_to,counters)
+        Octo::FunnelTracker.findOrCreateOrAdjust(args_from,counters)
+      end
 
       def checkUserProfileDetails(enterprise, user, msg)
         args = {
-          user_id: user.id,
-          user_enterprise_id: enterprise.id,
-          email: msg[:profileDetails].fetch('email')
+            user_id: user.id,
+            user_enterprise_id: enterprise.id,
+            email: msg[:profileDetails].fetch('email')
         }
         opts = {
-          username: msg[:profileDetails].fetch('username', ''),
-          gender: msg[:profileDetails].fetch('gender', ''),
-          dob: msg[:profileDetails].fetch('dob', ''),
-          alternate_email: msg[:profileDetails].fetch('alternate_email', ''),
-          mobile: msg[:profileDetails].fetch('mobile', ''),
-          extras: msg[:profileDetails].fetch('extras', '{}').to_s
+            username: msg[:profileDetails].fetch('username', ''),
+            gender: msg[:profileDetails].fetch('gender', ''),
+            dob: msg[:profileDetails].fetch('dob', ''),
+            alternate_email: msg[:profileDetails].fetch('alternate_email', ''),
+            mobile: msg[:profileDetails].fetch('mobile', ''),
+            extras: msg[:profileDetails].fetch('extras', '{}').to_s
         }
         Octo::UserProfileDetails.findOrCreateOrUpdate(args, opts)
       end
@@ -150,12 +164,12 @@ module Octo
       # @return [Octo::PushToken] The push token object corresponding to this user
       def checkPushToken(enterprise, user, msg)
         args = {
-          user_id: user.id,
-          user_enterprise_id: enterprise.id,
-          push_type: msg[:pushType].to_i
+            user_id: user.id,
+            user_enterprise_id: enterprise.id,
+            push_type: msg[:pushType].to_i
         }
         opts = {
-          pushtoken: msg[:pushToken]
+            pushtoken: msg[:pushToken]
         }
         Octo::PushToken.findOrCreateOrUpdate(args, opts)
       end
@@ -328,6 +342,39 @@ module Octo
       def parse(msg)
         msg2 = JSON.parse(msg)
         msg = msg2
+        m = { event_name: msg['event_name'] }
+        case msg['event_name']
+          when 'funnel_update'
+            m.merge!({
+                         rediskey: msg['rediskey']
+                     })
+          # return m
+          when 'update.profile'
+            m.merge!({
+                         profileDetails: msg['profileDetails']
+                     })
+          when 'page.view'
+            m.merge!({
+                         routeUrl:     msg['routeUrl'],
+                         categories:   msg.fetch('categories', []),
+                         tags:         msg.fetch('tags', [])
+                     })
+          when 'productpage.view'
+            m.merge!({
+                         routeUrl:     msg['routeUrl'],
+                         categories:   msg.fetch('categories', []),
+                         tags:         msg.fetch('tags', []),
+                         productId:    msg['productId'],
+                         productName:  msg['productName'],
+                         price:        msg['price']
+                     })
+          when 'update.push_token'
+            m.merge!({
+                         pushType:     msg['notificationType'],
+                         pushKey:      msg['pushKey'],
+                         pushToken:    msg['pushToken']
+                     })
+        end
         enterprise = msg['enterprise']
         raise StandardError, 'Parse Error' if enterprise.nil?
 
@@ -341,46 +388,22 @@ module Octo
                   enterprise['user_name']
                 elsif enterprise.has_key?'userName'
                   enterprise['userName']
+                else
+                  nil
                 end
-        m = {
-            id:             msg['uuid'],
-            enterpriseId:   eid,
-            enterpriseName: ename,
-            event_name:     msg['event_name'],
-            phone:          msg.fetch('phoneDetails', nil),
-            browser:        msg.fetch('browserDetails', nil),
-            userId:         msg.fetch('userId', -1),
-            created_at:     Time.now
-        }
-        case msg['event_name']
-          when 'update.profile'
-            m.merge!({
-                        profileDetails: msg['profileDetails']
-                    })
-          when 'page.view'
-            m.merge!({
-                        routeUrl:     msg['routeUrl'],
-                        categories:   msg.fetch('categories', []),
-                        tags:         msg.fetch('tags', [])
-                     })
-          when 'productpage.view'
-            m.merge!({
-                        routeUrl:     msg['routeUrl'],
-                        categories:   msg.fetch('categories', []),
-                        tags:         msg.fetch('tags', []),
-                        productId:    msg['productId'],
-                        productName:  msg['productName'],
-                        price:        msg['price']
-                     })
-          when 'update.push_token'
-            m.merge!({
-                        pushType:     msg['notificationType'],
-                        pushKey:      msg['pushKey'],
-                        pushToken:    msg['pushToken']
-                     })
-        end
+        m.merge!({
+                     id:             msg.fetch('uuid', nil),
+                     enterpriseId:   eid,
+                     enterpriseName: ename,
+                     phone:          msg.fetch('phoneDetails', nil),
+                     browser:        msg.fetch('browserDetails', nil),
+                     userId:         msg.fetch('userId', -1),
+                     created_at:     Time.now
+                 })
+
         m
       end
     end
   end
 end
+
