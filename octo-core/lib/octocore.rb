@@ -61,14 +61,15 @@ module Octo
     # with the global config hash
     configConfig = config.delete(:config)
     config = config.deep_merge(configConfig)
+
     # Now, good to merge the two
     self.connect config
   end
 
-  # Loads the true config. The true config is the hierarchial config
-  # @param [Hash] config The base config. Loaded config will be deep merged
-  #   with this
-  # @param [String] file The file from which config should be loaded
+# Loads the true config. The true config is the hierarchial config
+# @param [Hash] config The base config. Loaded config will be deep merged
+#   with this
+# @param [String] file The file from which config should be loaded
   # @param [String] config_fir The config dir in which the file is located
   # @return [Hash] The merged config hash
   def self.true_load(config, file, config_dir)
