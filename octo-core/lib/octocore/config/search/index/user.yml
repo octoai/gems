@@ -1,0 +1,42 @@
+settings:
+  number_of_shards: 1
+  number_of_replicas: 0
+mappings:
+  user:
+    properties:
+      enterpriseid:
+        type: string
+      userid:
+        type: integer
+      created:
+        type: date
+      updated:
+        type: date
+      last_login:
+        type: date
+      device_id:
+        type: string
+      manufacturer:
+        type: string
+      model:
+        type: string
+      city:
+        type: integer
+      country:
+        type: integer
+      state:
+        type: integer
+      os:
+        type: integer
+      browser:
+        type: integer
+      engagement:
+        type: integer
+      home_location:
+        type: geo_point
+      work_location:
+        type: geo_point
+      persona:
+        type: nested
+      time_slots:
+        type: nested
