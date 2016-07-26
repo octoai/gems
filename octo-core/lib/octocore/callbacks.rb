@@ -90,8 +90,8 @@ module Octo
       # You can change it from rpush to lpush, or set
       #  whichever you want to use.
       def createRedisShadowKey(keyname, value, duration)
-        Cequel::Record.redis.setex("shadow:" + key,duration,"")
-        Cequel::Record.redis.rpush(key, value)
+        Cequel::Record.redis.setex("shadow:" + keyname,duration,"")
+        Cequel::Record.redis.rpush(keyname, value)
       end
     end
   end
