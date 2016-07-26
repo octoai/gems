@@ -15,9 +15,6 @@ module Octo
 
       # Define the after_app_init hook
       after_app_init do |args|
-        # Not sure if we need to add init to
-        # redis session
-        # add_session args
         update_counters args
       end
 
@@ -74,16 +71,28 @@ module Octo
       # It self expires in n seconds from last hit
       def add_session(opts)
         if opts.has_key?(:type)
-          # create a shadow key for every list
-          # this helps us in catching the event
-          # when a key expires, and then we
-          # delete the main key with the session details
-          # after playing around with the value of the key
-          Cequel::Record.redis.setex("shadow:" + opts[:enterprise].id.to_s + "_" + opts[:user].id.to_s,Octo.get_config(:session_length),"")
-          Cequel::Record.redis.rpush(opts[:enterprise].id.to_s + "_" + opts[:user].id.to_s, opts[:type].to_s)
+          createRedisShadowKey(opts[:enterprise].id.to_s + '_' + opts[:user].id.to_s,
+                               opts[:type].to_s,
+                               Octo.get_config(:session_length))
         end
       end
 
+      # Method was created because when a redis key
+      #  expires you can just catch the key name,
+      #  and not its value. So what we do is
+      #  create a shadow key for the given key name
+      #  and make it expire in the given amt of
+      #  time (seconds).
+      # This helps us in catching the event
+      #  when the (shadow) key expires, after which we
+      #  read the value of the main key and later
+      #  delete the main key
+      # You can change it from rpush to lpush, or set
+      #  whichever you want to use.
+      def createRedisShadowKey(keyname, value, duration)
+        Cequel::Record.redis.setex("shadow:" + key,duration,"")
+        Cequel::Record.redis.rpush(key, value)
+      end
     end
   end
 

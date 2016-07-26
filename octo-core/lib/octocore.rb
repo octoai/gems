@@ -61,7 +61,6 @@ module Octo
     # with the global config hash
     configConfig = config.delete(:config)
     config = config.deep_merge(configConfig)
-
     # Now, good to merge the two
     self.connect config
   end

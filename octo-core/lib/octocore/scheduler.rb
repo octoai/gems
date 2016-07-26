@@ -54,6 +54,7 @@ module Octo
         end
       end
 
+      # Schedules the daily mail, to be sent at noon
       def schedule_subscribermail
         name = 'SubscriberDailyMailer'
         config = {

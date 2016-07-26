@@ -37,22 +37,18 @@ module Octo
 
       # simulate an app login
       app_init user
-      # sleep 0.5
       # simulate a random number of page views before going to product
       for i in 1..(1+rand(MAX_PAGES_TO_VISIT))
         pv user, fakepage(user.enterprise)
-        # sleep 0.5
       end
 
       # simulate a product page view
       ppv user, fakeproduct(user.enterprise)
-      # sleep 0.5
 
 
       #visit a page or not after going to the product page
       for i in 0..rand(2)
         pv user, fakepage(user.enterprise)
-        # sleep 0.5
       end
 
       puts "---- Next User ----"

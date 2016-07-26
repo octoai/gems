@@ -97,14 +97,7 @@ module Octo
                 checkPushToken(enterprise, user, msg)
                 checkPushKey(enterprise, msg)
               when 'funnel_update'
-                sessionList = Cequel::Record.redis.lrange(msg[:rediskey],0,-1)
-                Cequel::Record.redis.del(msg[:rediskey])
-                sessionList.each_index{ |index|
-                  if index!=(sessionList.length-1)
-                    checkFunnelTracker(enterprise,sessionList[index],sessionList[index+1])
-                  end
-                }
-
+                checkRedisSession(enterprise,msg)
             end
           end
       end
@@ -120,7 +113,33 @@ module Octo
         hook = [:after, event.gsub('.', '_')].join('_').to_sym
         Octo::Callbacks.run_hook(hook, *args)
       end
-      def checkFunnelTracker(enterprise,page1,page2)
+
+      # Checks for msg[:rediskey] in redis, parses it and
+      #  then calls updateFunnelTracker.
+      # @param [Octo::Enterprise] enterprise The Enterprise object
+      # @param [Hash] msg The message hash, MUST contain, :rediskey
+      # @return [void]
+
+      def checkRedisSession(enterprise,msg)
+        sessionList = Cequel::Record.redis.lrange(msg[:rediskey],0,-1)
+        Cequel::Record.redis.del(msg[:rediskey])
+        sessionList.each_index{ |index|
+          if index!=(sessionList.length-1)
+            updateFunnelTracker(enterprise,sessionList[index],sessionList[index+1])
+          end
+        }
+      end
+
+      # Checks if transition from page1 -> page2 exists, then
+      #  updates the value of its weight, else creates
+      #  the transition with default weight 1. It also creates an
+      #  entry for page 2 <- page 1, which helps us understand the
+      #  incoming entries for a particular node.
+      # @param [Octo::Enterprise] enterprise The Enterprise object
+      # @param [string] page1 The url of page1
+      # @param [string] page2 The url of page2
+      # @return [void]
+      def updateFunnelTracker(enterprise,page1,page2)
         args_to = {
             enterprise_id: enterprise.id,
             p1: page1,
@@ -140,7 +159,7 @@ module Octo
         Octo::FunnelTracker.findOrCreateOrAdjust(args_from,counters)
       end
 
-        def checkUserProfileDetails(enterprise, user, msg)
+      def checkUserProfileDetails(enterprise, user, msg)
         args = {
           user_id: user.id,
           user_enterprise_id: enterprise.id,
