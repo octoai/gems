@@ -29,7 +29,10 @@ module Octo
             name: opts.fetch('name', nil)
           }]
         }
-        enqueue_msg(message)
+        # Pass the message to resque only when mandrill key is present
+        if Octo.get_config(:mandrill_api_key) != ''
+          enqueue_msg(message)
+        end
       end
     end
 

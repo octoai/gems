@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    octocore (0.0.1)
+    octocore (0.0.2)
       cequel (~> 1.9, >= 1.9.0)
       descriptive_statistics (~> 2.5.1, >= 2.5.0)
       elasticsearch (~> 1.0.17, >= 1.0.17)

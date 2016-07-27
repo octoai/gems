@@ -119,7 +119,6 @@ module Octo
       # @param [Octo::Enterprise] enterprise The Enterprise object
       # @param [Hash] msg The message hash, MUST contain, :rediskey
       # @return [void]
-
       def checkRedisSession(enterprise,msg)
         sessionList = Cequel::Record.redis.lrange(msg[:rediskey],0,-1)
         Cequel::Record.redis.del(msg[:rediskey])
