@@ -7,7 +7,7 @@ before_script:
   - gem install bundler -v 1.11.2
   - gem install rake
 
-script: 'cd octo-core && rake spec'
+script: 'cd octo-core && bundle install && rake spec'
 bundler_args: '--without=debug'
 services:
   - cassandra
