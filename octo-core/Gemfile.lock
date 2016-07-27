@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    octocore (0.0.2)
+    octocore (0.0.3)
       cequel (~> 1.9, >= 1.9.0)
       descriptive_statistics (~> 2.5.1, >= 2.5.0)
       elasticsearch (~> 1.0.17, >= 1.0.17)
@@ -117,3 +117,6 @@ DEPENDENCIES
   octocore!
   parallel_tests (~> 2.5.0, >= 2.5.0)
   rspec (~> 3.4.0, >= 3.4.0)
+
+BUNDLED WITH
+   1.11.2
