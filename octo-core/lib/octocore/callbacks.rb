@@ -30,11 +30,13 @@ module Octo
 
       # Define the after_page_view hook
       after_page_view do |args|
+        add_session args
         update_counters args
       end
 
       # Define the after_productpage_view hook
       after_productpage_view do |args|
+        add_session args
         update_counters args
       end
     end
@@ -64,8 +66,34 @@ module Octo
           Octo::ApiHit.increment_for(opts[:event])
         end
       end
-    end
+      # Adds user session for page_view and
+      # product_page_view to redis.
+      # It self expires in n seconds from last hit
+      def add_session(opts)
+        if opts.has_key?(:type)
+          createRedisShadowKey(opts[:enterprise].id.to_s + '_' + opts[:user].id.to_s,
+                               opts[:type].to_s,
+                               Octo.get_config(:session_length))
+        end
+      end
 
+      # Method was created because when a redis key
+      #  expires you can just catch the key name,
+      #  and not its value. So what we do is
+      #  create a shadow key for the given key name
+      #  and make it expire in the given amt of
+      #  time (seconds).
+      # This helps us in catching the event
+      #  when the (shadow) key expires, after which we
+      #  read the value of the main key and later
+      #  delete the main key
+      # You can change it from rpush to lpush, or set
+      #  whichever you want to use.
+      def createRedisShadowKey(keyname, value, duration)
+        Cequel::Record.redis.setex("shadow:" + keyname,duration,"")
+        Cequel::Record.redis.rpush(keyname, value)
+      end
+    end
   end
 
   # The class responsible for handling callbacks.
@@ -73,6 +101,5 @@ module Octo
   class Callbacks
     include Hooks
     include Octo::OctoHooks
-
   end
 end
