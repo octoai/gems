@@ -17,7 +17,7 @@ module Octo
       # @param [Hash] params The params of the request
       # @param [String] body The body of the request
       def perform_request(method, path, params, body)
-        Octo.logger.info "--> #{method.upcase} #{path} #{params} #{body}"
+        Octo.logger.debug "--> #{method.upcase} #{path} #{params} #{body}"
 
         response = connection.run_request \
           method.downcase.to_sym,
@@ -25,7 +25,8 @@ module Octo
           ( body ? MultiJson.dump(body): nil ),
           {'Content-Type' => 'application/json'}
 
-        Octo.logger.info "#{ response.status }, #{ response.body }"
+        Octo.logger.debug "#{ response.status }, #{ response.body }"
+        response
       end
 
       # Creates a new connection to the server if not already done

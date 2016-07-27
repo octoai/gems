@@ -32,6 +32,9 @@ module Octo
 
 
     # Returns the data for indexing purposess.
+    # @return [Hash] The user object's fields and values represented as a hash
+    #   for indexing purposes
+    #
     def indexed_json
       i = Hash.new
       i.merge!({
@@ -58,42 +61,69 @@ module Octo
       i
     end
 
+    # Gets the list of device IDs for the user
+    # @return [Array<String>] Device IDs for the user
+    #
     def device_ids
       user_phone_details.collect { |x| x.deviceid }
     end
 
+    # Gets the list of device manufacturers for the set of devices that user
+    #   has
+    # @return [Array<String>] The array of device manufacturers
+    #
     def device_manufacturers
       user_phone_details.collect { |x| x.manufacturer }
     end
 
+    # Gets the list of device models for the user
+    # @return [Array<String>] The array of device models for the user
+    #
     def device_models
       user_phone_details.collect { |x| x.model }
     end
 
+    # Gets the browsers for the user
+    # @return [Array<String>] Array of browsers
+    #
     def browsers
       []
     end
 
+    # Gets the list of OSs for the user
+    # @return [Array<String>] List of OSs of the user
+    #
     def os
       []
     end
 
+    # Gets the engagement class of the user
+    # @return [Fixnum] The engagement class of user. Defaults to 1
+    #
     def engagement
       1
     end
 
+    # Returns the home location of user as a geopoint data type
+    # @return [Hash] The home location of user
+    #
     def home_location
       if home_location_lat and home_location_lon
         [home_location_lat, home_location_lon].as_geopoint
       end
     end
 
+    # Gets the work location of user as a geopoint data type
+    # @return [Hash] The work location of user
+    #
     def work_location
       if work_location_lat and work_location_lon
         [work_location_lat, work_location_lon].as_geopoint
       end
     end
 
+    # Gets the time slots for which the user is active
+    # @return [Array<Range>] The time slots of user
     def time_slots
       []
     end

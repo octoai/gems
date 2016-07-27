@@ -83,6 +83,8 @@ class ::String
 end
 
 class ::Hash
+
+  # Deep merge a hash with another hash
   def deep_merge(second)
     merger = proc { |key, v1, v2| Hash === v1 && Hash === v2 ? v1.merge(v2, &merger) : Array === v1 && Array === v2 ? v1 | v2 : [:undefined, nil, :nil].include?(v2) ? v1 : v2 }
     self.merge(second.to_h, &merger)
@@ -92,11 +94,15 @@ end
 
 class ::Array
 
+  # Returns an array of float as a geopoint
+  # @return [Hash] A hash with keys as `lat` and `lon` with
+  #   their corresponding values. This is the convenient
+  #   wrapper for elasticsearch data type
   def as_geopoint
     if self.count == 2
       {
-        lat: self[0],
-        lon: self[1]
+        lat: self[0].to_f,
+        lon: self[1].to_f
       }
     else
       raise ArgumentError, 'Cannot convert as geopoint'

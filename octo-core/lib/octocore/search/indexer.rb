@@ -11,6 +11,11 @@ module Octo
       #
       @queue = :indexer_queue
 
+      # Performs the indexing part
+      # @param [String] action The action to be performed. Namely `index` or
+      #   `delete`
+      # @param [Hash] data The data to be used while performing the action
+      #
       def self.perform(action, data)
         _data = data.deep_symbolize_keys
         indexname = _data.delete(:index)
@@ -20,6 +25,9 @@ module Octo
           body: _data.delete(:body)
       end
 
+      # Gets the search client for the indexer.
+      # @return [Octo::Search::Client] A search client
+      #
       def self.client
         @client ||= Octo::Search::Client.new
       end
