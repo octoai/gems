@@ -116,6 +116,7 @@ PLATFORMS
 DEPENDENCIES
   octocore!
   parallel_tests (~> 2.5.0, >= 2.5.0)
+  rake
   rspec (~> 3.4.0, >= 3.4.0)
 
 BUNDLED WITH
