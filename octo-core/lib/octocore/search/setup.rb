@@ -1,5 +1,7 @@
 module Octo
 
+  module Search
+
     # Setup module for ElasticSearch
     module Setup
 
@@ -67,5 +69,6 @@ module Octo
 
     end
 
+  end
 
 end

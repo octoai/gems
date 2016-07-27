@@ -1,2 +1,11 @@
+#!/bin/bash
+
+# Remove any existing gem present
 rm *.gem
-gem build octocore.gemspec && gem uninstall octocore --force && gem install octocore-0.0.1.gem
+
+# Build the gem
+gem build octocore.gemspec && gem uninstall octocore --force
+
+
+# Install it
+find . -name "*.gem" | xargs gem install

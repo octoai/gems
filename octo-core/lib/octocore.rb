@@ -127,6 +127,8 @@ module Octo
 
     self.logger.info('Setting callbacks.')
 
+    #Elasticsearch::Model.client = Octo::Search::Client.new
+
   end
 
   # Creates a logger for Octo
@@ -140,3 +142,4 @@ module Octo
   end
 
 end
+

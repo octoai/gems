@@ -88,3 +88,18 @@ class ::Hash
     self.merge(second.to_h, &merger)
   end
 end
+
+
+class ::Array
+
+  def as_geopoint
+    if self.count == 2
+      {
+        lat: self[0],
+        lon: self[1]
+      }
+    else
+      raise ArgumentError, 'Cannot convert as geopoint'
+    end
+  end
+end
