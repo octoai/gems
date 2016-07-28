@@ -14,15 +14,24 @@ module Octo
       # Performs the indexing part
       # @param [String] action The action to be performed. Namely `index` or
       #   `delete`
-      # @param [Hash] data The data to be used while performing the action
+      # @param [Hash] opts The data to be used while performing the action
+      # @option opts [String] idx_name The index name to be used
+      # @option opts [String] doc_type The document type of the document
+      # @option opts [String] id The ID of the document
+      # @option opts [Hash] body The body of the document to be indexed
       #
-      def self.perform(action, data)
-        _data = data.deep_symbolize_keys
-        indexname = _data.delete(:index)
-        self.client.index index: indexname,
-          type: indexname,
-          id: _data[:body][:id],
-          body: _data.delete(:body)
+      def self.perform(action, opts={})
+        action = action.to_sym
+        if action == :index
+          self.client.index index: opts['idx_name'],
+            type: opts['doc_type'],
+            id: opts['body']['id'],
+            body: opts['body']
+        elsif action == :delete
+          self.client.delete index: opts['idx_name'],
+            type: opts['doc_type'],
+            id: opts['id']
+        end
       end
 
       # Gets the search client for the indexer.

@@ -1,3 +1,5 @@
+require 'elasticsearch/model'
+
 module Octo
   module Search
     module Searchable
@@ -6,32 +8,35 @@ module Octo
       #   it based on appropriate events
       #
       def self.included(base)
-        [:save, :create, :update].each do |mtd|
-          base.send("after_#{ mtd }", lambda { async_index indexed_json })
+        base.send(:include, ::Elasticsearch::Model)
+        [:save].each do |mtd|
+          base.send("after_#{ mtd }", lambda { async_index self })
         end
-        base.after_destroy { async_delete id }
+        base.after_destroy { async_delete self }
       end
 
       # Perform an async indexing of the data
-      # @param [Hash] data The data to be indexed
-      def async_index(data)
-        _data = { index: index_name,
-                  body: data }
-        Resque.enqueue(Octo::Search::Indexer, :index, _data)
+      # @param [Object] model The model instance to be indexed
+      #
+      def async_index(model)
+        opts = {
+          idx_name: model.__elasticsearch__.index_name,
+          doc_type: model.__elasticsearch__.document_type,
+          body: model.as_indexed_json
+        }
+        Resque.enqueue(Octo::Search::Indexer, :index, opts)
       end
 
       # Perform async delete of the document from index.
-      # @param [Fixnum] id The ID of the document to be removed from the index
+      # @param [Object] model The model instance to be indexed
       #
-      def async_delete(id)
-        Resque.enqueue(Octo::Search::Indexer, :delete, id)
-      end
-
-      # Helper module for getting the index name corresponding to the class
-      # @return [String] The name of the index to be used in elasticsearch
-      #
-      def index_name
-        @index_name ||= self.class.to_s.split(/::/).last.downcase
+      def async_delete(model)
+        opts = {
+          idx_name: model.__elasticsearch__.index_name,
+          doc_type: model.__elasticsearch__.document_type,
+          id: model.id
+        }
+        Resque.enqueue(Octo::Search::Indexer, :delete, opts)
       end
 
     end

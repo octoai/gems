@@ -30,12 +30,31 @@ module Octo
     has_many :user_browser_details, class_name: 'Octo::UserBrowserDetails'
     has_many :user_personas, class_name: 'Octo::UserPersona'
 
+    settings index: { number_of_shards: 1 } do
+      mappings dynamic: 'false' do
+        indexes :enterpriseid, analyzer: 'keyword', index_options: 'offsets'
+        indexes :id, type: :integer
+        indexes :last_login, type: :date
+        indexes :curr_state, type: :string
+        indexes :city, type: :string
+        indexes :state, type: :string
+        indexes :country, type: :string
+        indexes :os, type: :nested
+        indexes :browser, type: :nested
+        indexes :engagement, type: :integer
+        indexes :home_location, type: :geo_point
+        indexes :work_location, type: :geo_point
+        indexes :persona, type: :nested
+        indexes :time_slots, type: :nested
+      end
+    end
+
 
     # Returns the data for indexing purposess.
     # @return [Hash] The user object's fields and values represented as a hash
     #   for indexing purposes
     #
-    def indexed_json
+    def as_indexed_json(options = {})
       i = Hash.new
       i.merge!({
         id: id,
