@@ -1,32 +1,16 @@
-# Gems #
+# Deprecated #
 
-Contains all the ruby gems specific to Octomatic.
+This repo is deprecated. 
 
-# Commit Guide
+### Why?
 
-Whenever you add a new gem, make sure to update `build.sh` also. Else, it won'tbe build.
+We had more than 4 different gems in this one repo. It was all good in the beginning, but some gems evolve faster than other. Versioning, tagging and build tests were becoming cumbersome. So, we alloted each gem to their own home.
 
-# Building
+## Where are they now?
 
-## Build all gems
+- Octo-core [https://github.com/octoai/gem-octocore](https://github.com/octoai/gem-octocore)
+- Octo-recommender [https://github.com/octoai/gem-octorecommender](https://github.com/octoai/gem-octorecommender)
+- Octo-notification [https://github.com/octoai/gem-octonotification](https://github.com/octoai/gem-octonotification)
+- Octo-newsfeed [https://github.com/octoai/gem-octonewsfeed](https://github.com/octoai/gem-octonewsfeed)
+- Octo GA Analysis [https://github.com/octoai/gem-octogaanalysis](https://github.com/octoai/gem-octogaanalysis)
 
-Provided is a `build.sh` script. Execute it. It will build all the gems
-
-## Individual Build
-
-If you want to build a specific gem peform these steps
-
-- `cd` to the gem's dir
-- `gem build gemname.gemspec` For the gemspec file that is present. This will create a .gem file
-- Execute `gem install gemname-0.x.y.gem`. This will install the gem alongwith it's rdoc.
-
-
-## Note:
-
-- If permissions required then type 'sudo' for ubuntu and give super user permissions to install gem
-- If any gem fail because of dependencies, try install dependencies manually.
-
-
-# ReadME
-
-Each gem provides their own README. Refer to the gem for this section.
